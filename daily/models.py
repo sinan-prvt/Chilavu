@@ -58,5 +58,33 @@ class WalletSettings(models.Model):
     monthly_budget = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     currency = models.CharField(max_length=5, default="₹")
 
+    # savings goal (progress = income − spending since goal_since)
+    goal_name = models.CharField(max_length=60, blank=True)
+    goal_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    goal_since = models.DateField(null=True, blank=True)
+
+    # hashed recovery code for "forgot password" (no email needed)
+    recovery_hash = models.CharField(max_length=128, blank=True)
+
     def __str__(self):
         return f"{self.user.username} wallet"
+
+
+class Recurring(models.Model):
+    """An entry that is added automatically every month (salary, rent, EMI…)."""
+    KIND_CHOICES = Expense.KIND_CHOICES
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recurring")
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES, default="income")
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    note = models.CharField(max_length=200)
+    day = models.PositiveSmallIntegerField(default=1)  # day of month (1–31; clamped to month length)
+    active = models.BooleanField(default=True)
+    last_applied = models.CharField(max_length=7, blank=True)  # "YYYY-MM" of the last month it was added
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["day", "created_at"]
+
+    def __str__(self):
+        return f"{self.user.username} {self.kind} {self.amount} on day {self.day}"

@@ -328,6 +328,80 @@ h2 button{font-size:13px;color:var(--primary);font-weight:600;background:none;bo
 
 /* ===== install banner ===== */
 /* install progress overlay */
+/* ===== savings goal ===== */
+.goalc{display:flex;align-items:center;gap:14px;padding:14px 16px;margin-top:12px;cursor:pointer}
+.gring{--p:0;width:58px;height:58px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:conic-gradient(var(--brand-green) calc(var(--p)*1%),var(--surface2) 0);transition:--p 1s}
+.gring div{width:46px;height:46px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-size:13px;font-weight:800}
+.goalc .t{flex:1;min-width:0}.goalc small{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.goalc b{display:block;font-size:16px;font-weight:800;margin-top:1px}.goalc span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.gbar{height:6px;border-radius:9px;background:var(--surface2);margin-top:8px;overflow:hidden}
+.gbar i{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,var(--primary-2),var(--brand-green));transition:width 1.2s cubic-bezier(.2,1,.3,1)}
+.goalc.done{background:linear-gradient(120deg,var(--green-soft),var(--surface) 70%)}
+
+/* recovery banner + code */
+.recov{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-top:12px;border-color:#f5d48a;background:linear-gradient(120deg,#fff8e6,var(--surface) 70%)}
+:root[data-theme="dark"] .recov{background:var(--surface)}
+.recov .t{flex:1;min-width:0}.recov b{display:block;font-size:14px}.recov span{display:block;font-size:12px;color:var(--muted);line-height:1.4}
+.ri{width:40px;height:40px;border-radius:12px;background:#fff1cc;display:grid;place-items:center;font-size:20px;flex:none}
+.ri.big{width:64px;height:64px;font-size:30px;border-radius:20px;margin:0 auto}
+.rcode{font-family:ui-monospace,Consolas,monospace;font-size:24px;font-weight:800;letter-spacing:.12em;padding:14px;border-radius:14px;
+  background:var(--surface2);border:2px dashed var(--line);user-select:all}
+
+/* stats: share + calendar */
+.sharebtn{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;margin-top:12px;text-align:left;cursor:pointer;transition:transform .12s}
+.sharebtn:active{transform:scale(.98)}
+.sharebtn>span{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;font-weight:800;color:#fff;flex:none;
+  background:linear-gradient(145deg,var(--primary-2),var(--primary))}
+.sharebtn b{display:block;font-size:14px}.sharebtn small{display:block;font-size:12px;color:var(--muted)}
+.cal{padding:14px}
+.cal-h,.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-h span{text-align:center;font-size:11px;font-weight:700;color:var(--soft);padding-bottom:4px}
+.cd{aspect-ratio:1;border:0;border-radius:10px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  font-size:12px;color:var(--text);position:relative;animation:rise .4s both;animation-delay:calc(var(--i)*12ms);transition:transform .12s}
+.cd:active{transform:scale(.92)}
+.cd b{font-weight:700}.cd small{font-size:9px;font-weight:700;opacity:.85}
+.cd.l1{background:#dbe5fb}.cd.l2{background:#9fb6ee}.cd.l3{background:#4f74d6;color:#fff}.cd.l4{background:var(--primary);color:#fff}
+:root[data-theme="dark"] .cd.l1{background:#1d2a52}:root[data-theme="dark"] .cd.l2{background:#2a4290}
+.cd.now{outline:2px solid var(--brand-green);outline-offset:1px}
+.cd.sel{box-shadow:0 0 0 3px var(--primary-soft),0 6px 14px -6px rgba(11,26,74,.5);transform:scale(1.06)}
+.cd.hasinc::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--brand-green)}
+.cal-day .list{display:grid;gap:8px}.cal-day .dayhead{margin-top:14px}
+
+/* profile: recurring, small buttons */
+.linkbtn{border:0;background:none;color:var(--primary);font-weight:700;font-size:14px;cursor:pointer;padding:0}
+.srow.rec{gap:10px}.srow.rec.off{opacity:.55}.srow.rec b.g{color:var(--green)}
+.recact{display:flex;align-items:center;gap:10px;flex:none}
+.recdel{border:0;background:var(--red-soft);color:var(--red);width:30px;height:30px;border-radius:10px;font-weight:800}
+.recadd{padding:12px 0 14px;border-top:1px solid var(--line)}
+#recList:empty+.recadd,#recList .hint+.recadd{border-top:0}
+.recrow{display:flex;gap:8px;margin-top:10px}.recrow .field{padding:11px 12px;font-size:15px}
+#recAmt{width:130px;flex:none}
+.recday{flex:1;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted)}
+.recday select{width:84px;padding:10px}
+.recbtn{padding:11px 20px;flex:none}
+.recnow{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:10px}
+.recnow input{width:18px;height:18px;accent-color:var(--primary)}
+.kind2.mini2 button{padding:7px;font-size:13px}
+
+/* app lock */
+.lock{position:fixed;inset:0;z-index:998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;
+  background:radial-gradient(500px 300px at 50% 20%,var(--primary-soft),transparent 70%),var(--bg)}
+.lock.on{display:flex;animation:in .3s ease}
+html.locked body{overflow:hidden}
+.lock-logo{width:64px;height:64px;border-radius:20px;box-shadow:0 14px 30px -12px rgba(11,26,74,.45);margin-bottom:18px}
+.lock>b{font-size:20px;font-weight:800}.lock>small{color:var(--muted);font-size:13px;margin-top:4px;min-height:18px}
+.dots{display:flex;gap:16px;margin:24px 0 30px}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--primary);transition:background .15s,transform .15s}
+.dots i.on{background:var(--primary);transform:scale(1.1)}
+.pinpad{display:grid;grid-template-columns:repeat(3,72px);gap:16px}
+.pinpad button{width:72px;height:72px;border-radius:50%;border:0;background:var(--surface);box-shadow:var(--sh-1);font-size:26px;font-weight:600;color:var(--text);
+  transition:transform .1s,background .1s}
+.pinpad button:active{transform:scale(.9);background:var(--primary-soft)}
+.pinpad .pbio,.pinpad .pdel{background:none;box-shadow:none;color:var(--primary)}
+.pinpad .pbio svg{width:30px;height:30px}.pinpad .pbio:disabled{visibility:hidden}
+.lock-link{border:0;background:none;color:var(--muted);font-weight:600;font-size:13px;margin-top:26px;cursor:pointer}
+
 /* ===== income ===== */
 .card3d .bal{margin-bottom:6px}
 .card3d .bal.neg{color:#ffb4c0}
@@ -521,6 +595,17 @@ h2 button{font-size:13px;color:var(--primary);font-weight:600;background:none;bo
       <div class="week" id="stWeek"></div>
     </div>
 
+    <div class="card goalc" id="goalBox" style="display:none" onclick="go('settings');setTimeout(()=>$('goalName').focus(),400)">
+      <div class="gring" id="gRing"><div id="gPct">0%</div></div>
+      <div class="t"><small>Savings goal</small><b id="gName"></b><span id="gSub"></span><div class="gbar"><i id="gBar"></i></div></div>
+    </div>
+
+    <div class="card recov" id="recovBox" style="display:none">
+      <div class="ri">🔑</div>
+      <div class="t"><b>Protect your account</b><span>Save a recovery code so you can reset your password if you forget it.</span></div>
+      <button class="ibtn" onclick="makeRecovery()">Create</button>
+    </div>
+
     <div class="card install" id="installBox" style="display:none">
       <img src="/static/daily/icons/icon-192.png?v=2" alt="">
       <div class="t"><b>Install Chilavu</b><span id="installSub">Add it to your home screen like an app</span></div>
@@ -546,6 +631,9 @@ h2 button{font-size:13px;color:var(--primary);font-weight:600;background:none;bo
       <div class="card mini"><small>Spent</small><b id="mTotal">—</b></div>
       <div class="card mini"><small id="mSavedL">Saved</small><b id="mSaved">—</b></div>
     </div>
+    <button class="card sharebtn" onclick="shareReport()"><span>⤴</span><div><b>Share monthly report</b><small>An image of this month's summary for WhatsApp</small></div></button>
+    <h2>Calendar <small class="h2s">tap a day to see it</small></h2>
+    <div class="card cal"><div class="cal-h" id="calHead"></div><div class="cal-g" id="calGrid"></div><div class="cal-day" id="calDay"></div></div>
     <h2>Daily spending <small class="h2s">avg <b id="mAvg">—</b>/day · <b id="mCount">0</b> spends</small></h2>
     <div class="card bars"><div class="cols" id="cols"></div><div class="xs" id="xs"></div></div>
     <h2>Top spends</h2>
@@ -568,16 +656,59 @@ h2 button{font-size:13px;color:var(--primary);font-weight:600;background:none;bo
       <div class="srow">Currency<select class="field" id="setCur"><option>₹</option><option>$</option><option>€</option><option>£</option><option>AED</option></select></div>
       <div class="srow">Dark mode<button class="toggle" id="themeT"></button></div>
     </div>
+    <h2>Savings goal</h2>
+    <div class="card set">
+      <div class="srow">Goal name<input class="field" id="goalName" placeholder="e.g. New bike" maxlength="60"></div>
+      <div class="srow">Target amount<input class="field" id="goalAmt" type="number" inputmode="decimal" placeholder="0 = no goal"></div>
+      <div class="srow"><span class="hint" style="margin:0">Progress counts income minus spending from the day you set the goal.</span><button class="linkbtn" id="goalSave">Save goal</button></div>
+    </div>
+
+    <h2>Repeat every month <small class="h2s">salary, rent, EMI…</small></h2>
+    <div class="card set">
+      <div id="recList"></div>
+      <div class="recadd" id="recForm">
+        <div class="kind2 mini2" id="recKind"><button data-k="income" class="on">Income</button><button data-k="expense">Expense</button><i class="kpill"></i></div>
+        <div class="recrow">
+          <input class="field" id="recNote" placeholder="Name (Salary, Rent…)" maxlength="200">
+          <input class="field" id="recAmt" type="number" inputmode="decimal" placeholder="Amount">
+        </div>
+        <div class="recrow">
+          <label class="recday">Every month on day <select class="field" id="recDay"></select></label>
+          <button class="btn recbtn" id="recSave">Add</button>
+        </div>
+        <label class="recnow" id="recNowRow"><input type="checkbox" id="recNow"> Also add it for this month now</label>
+      </div>
+    </div>
+
+    <h2>Budget alerts</h2>
+    <div class="card set">
+      <div class="srow"><span>Warn me at 80% and 100% of budget<small class="hint">Uses the monthly budget set above</small></span><button class="toggle" id="budAlertT"></button></div>
+    </div>
+
     <h2>Daily reminder</h2>
     <div class="card set">
       <div class="srow"><span>Remind me to add spends<small class="hint" id="remHint">Get a nudge if you haven't added anything today</small></span><button class="toggle" id="remT"></button></div>
       <div class="srow" id="remTimeRow">Reminder time<select class="field" id="remHour"></select></div>
       <div class="srow" id="remTestRow">Test it<a href="#" id="remTest">Send test reminder</a></div>
     </div>
+    <h2>Security <small class="h2s">optional</small></h2>
+    <div class="card set">
+      <div class="srow"><span>App lock<small class="hint" id="lockHint">Ask for a PIN when the app opens</small></span><button class="toggle" id="lockT"></button></div>
+      <div class="srow" id="bioRow" style="display:none"><span>Unlock with fingerprint / face<small class="hint">Uses your phone's screen lock</small></span><button class="toggle" id="bioT"></button></div>
+      <div class="srow" id="pinChRow" style="display:none">Change PIN<button class="linkbtn" id="pinCh">Change</button></div>
+      <div class="srow"><span>Recovery code<small class="hint" id="recovHint">Lets you reset a forgotten password</small></span><button class="linkbtn" onclick="makeRecovery()">New code</button></div>
+    </div>
+
+    <h2>Backup</h2>
+    <div class="card set">
+      <div class="srow"><span>Download backup<small class="hint">All entries, repeats and settings in one file</small></span><a href="/backup.json">Download</a></div>
+      <div class="srow"><span>Restore from backup<small class="hint">Adds entries from a Chilavu backup; duplicates are skipped</small></span><label class="linkbtn">Choose file<input type="file" id="restoreFile" accept=".json,application/json" hidden></label></div>
+      <div class="srow">Export spreadsheet<a href="/export.csv">Download CSV</a></div>
+    </div>
+
     <h2>Account</h2>
     <div class="card set">
       <div class="srow">Install app<a href="#" id="installLink">Add to home screen</a></div>
-      <div class="srow">Export data<a href="/export.csv">Download CSV</a></div>
       <div class="srow">Account<a href="/logout/" style="color:var(--red)">Log out</a></div>
     </div>
   </section>
@@ -607,6 +738,28 @@ h2 button{font-size:13px;color:var(--primary);font-weight:600;background:none;bo
   <button class="delbtn" id="delBtn" style="display:none">Delete</button>
 </div>
 <div class="toasts" id="toasts"></div>
+<!-- app lock (only used when turned on in Profile) -->
+<div class="lock" id="lock" aria-hidden="true">
+  <img class="lock-logo" src="/static/daily/icons/logo-mark.png" alt="">
+  <b id="lockTitle">Enter PIN</b>
+  <small id="lockSub">Chilavu is locked</small>
+  <div class="dots" id="lockDots"><i></i><i></i><i></i><i></i></div>
+  <div class="pinpad" id="pinpad"></div>
+  <button class="lock-link" id="lockForgot">Forgot PIN? Sign out</button>
+</div>
+
+<!-- recovery code dialog -->
+<div class="inst-ov" id="recOv" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="inst-card">
+    <div class="ri big">🔑</div>
+    <b>Your recovery code</b>
+    <p>Write it down or screenshot it. You need it with your username to reset a forgotten password. It is shown only once and works one time.</p>
+    <div class="rcode" id="rcode">····-····-····</div>
+    <button class="btn" style="width:100%;margin-top:14px" id="rcopy">Copy code</button>
+    <button class="lock-link" style="margin-top:10px" onclick="$('recOv').classList.remove('on')">I've saved it</button>
+  </div>
+</div>
+
 <div class="inst-ov" id="instOv" onclick="if(event.target===this)instClose()">
   <div class="inst-card">
     <div class="inst-icon"><img src="/static/daily/icons/icon-192.png?v=2" alt=""><div class="inst-ring"></div><div class="inst-check">✓</div></div>
@@ -711,6 +864,7 @@ function renderHome(){
   $("recent").innerHTML=TX.length?TX.slice(0,8).map(txRow).join(""):`<div class="empty"><div>🪙</div>Nothing added yet.<br>Add your salary or a spend to begin.</div>`;
   stagger($("recent"));
   renderStreak();
+  if(typeof renderExtras==="function")renderExtras();
 }
 $("budgetBox").onclick=()=>go("settings");
 
@@ -788,6 +942,8 @@ async function renderStats(){
   $("legend").innerHTML=arr.length?arr.map(([k,v])=>`<div class="lg"><span style="width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(k)}</span><div class="bar"><span style="width:${Math.round(v/arr[0][1]*100)}%;background:${colorFor(k)}"></span></div><b>${money(v)}</b></div>`).join("")
     :`<div class="empty">No spends this month.</div>`;
   stagger($("legend"));
+  if(typeof renderCal==="function")renderCal(list,y,mo);
+  lastStatsList=list;
 }
 
 /* history */
@@ -877,6 +1033,8 @@ async function save(){
     else{TX.unshift(await api("/api/expenses/","POST",body))}
     TX.sort((a,b)=>b.date.localeCompare(a.date)||b.created_at.localeCompare(a.created_at));
     closeSheet();const fb=document.querySelector(".fab").getBoundingClientRect();if(!S.id)confetti(fb.left+fb.width/2,fb.top);toast(S.id?"Entry updated":(inc?"Income added":"Spend added"),`${name} · ${inc?"+":""}${money(amount)}`);refresh();
+    if(!inc&&typeof checkBudget==="function")setTimeout(checkBudget,1200);
+    if(inc&&typeof refreshWallet==="function")refreshWallet();
   }catch(e){toast("Could not save","Check your connection","err")}
 }
 $("delBtn").onclick=()=>{const id=S.id;closeSheet();softDelete(id)};
@@ -1087,5 +1245,266 @@ function refresh(){renderHome();const p=document.querySelector(".page.on").id;if
   if(new URLSearchParams(location.search).get("add")==="1"){history.replaceState(null,"","/");setTimeout(()=>openSheet(),400)}
   checkReminder();
 })();
+</script>
+
+<script>
+/* ================= EXTRAS: goal, budget alerts, recurring, calendar, report, backup, lock, recovery ================= */
+var lastStatsList=[];
+const fmt0=n=>money(Math.round(n));
+
+/* ---------- savings goal + recovery banner (Home) ---------- */
+let HAS_RECOVERY=true;
+async function refreshWallet(){try{WALLET=await api("/api/wallet/");renderExtras()}catch(e){}}
+function renderExtras(){
+  const G=+WALLET.goal_amount||0,box=$("goalBox");
+  if(G>0){
+    const saved=+WALLET.goal_saved||0,pct=Math.min(100,Math.round(saved/G*100));
+    box.style.display="flex";
+    $("gName").textContent=WALLET.goal_name||"My goal";
+    $("gSub").textContent=pct>=100?`Goal reached! ${fmt0(saved)} saved 🎉`:`${fmt0(saved)} of ${fmt0(G)} · ${fmt0(Math.max(0,G-saved))} to go`;
+    $("gPct").textContent=pct+"%";
+    $("gRing").style.setProperty("--p",pct);
+    requestAnimationFrame(()=>$("gBar").style.width=pct+"%");
+    box.classList.toggle("done",pct>=100);
+  }else box.style.display="none";
+  $("recovBox").style.display=HAS_RECOVERY||lsGet("recovDismiss")===TODAY?"none":"flex";
+}
+
+/* ---------- recovery code ---------- */
+async function makeRecovery(){
+  try{
+    const r=await api("/api/recovery/","POST");
+    $("rcode").textContent=r.code;$("recOv").classList.add("on");
+    HAS_RECOVERY=true;renderExtras();$("recovHint").textContent="Saved — make a new one if you lose it";
+  }catch(e){toast("Could not create a code","Check your connection","err")}
+}
+$("rcopy").onclick=async()=>{try{await navigator.clipboard.writeText($("rcode").textContent);toast("Code copied","Paste it somewhere safe")}catch(e){toast("Copy not allowed","Write it down instead","info")}};
+(async()=>{try{const r=await api("/api/recovery/");HAS_RECOVERY=r.has_code;
+  $("recovHint").textContent=r.has_code?"Saved — make a new one if you lose it":"Not set yet — create one now";renderExtras()}catch(e){}})();
+if(new URLSearchParams(location.search).get("recovered")==="1"){history.replaceState(null,"","/");
+  setTimeout(()=>toast("Password changed","Create a new recovery code in Profile","ok",null,4500),600)}
+
+/* ---------- goal settings ---------- */
+function fillGoal(){$("goalName").value=WALLET.goal_name||"";$("goalAmt").value=+WALLET.goal_amount||""}
+$("goalSave").onclick=async()=>{
+  const amt=+$("goalAmt").value||0,name=$("goalName").value.trim();
+  if(amt>0&&!name){toast("Name your goal","e.g. New bike, Trip, Emergency fund","err");$("goalName").focus();return}
+  try{WALLET=await api("/api/wallet/","POST",{goal_name:name,goal_amount:amt.toFixed(2)});renderExtras();
+    toast(amt>0?"Goal saved":"Goal removed",amt>0?`${name} · ${fmt0(amt)}`:"")}catch(e){toast("Could not save","Check your connection","err")}
+};
+
+/* ---------- budget alerts ---------- */
+const budAlertsOn=()=>lsGet("budAlerts")!=="0";
+function fillBudAlert(){$("budAlertT").classList.toggle("on",budAlertsOn())}
+$("budAlertT").onclick=()=>{lsSet("budAlerts",budAlertsOn()?"0":"1");fillBudAlert();toast(budAlertsOn()?"Budget alerts on":"Budget alerts off","","info")};
+function checkBudget(){
+  const B=+WALLET.monthly_budget;if(!B||!budAlertsOn())return;
+  const mk=TODAY.slice(0,7),spent=sum(EXP().filter(t=>t.date.startsWith(mk))),pct=spent/B*100;
+  const level=pct>=100?100:pct>=80?80:0;if(!level)return;
+  const key="budAlert-"+mk;if(+(lsGet(key)||0)>=level)return;lsSet(key,level);
+  const title=level>=100?"Budget crossed!":"80% of budget used",
+        body=level>=100?`You've spent ${fmt0(spent)} of your ${fmt0(B)} budget this month.`:`${fmt0(B-spent)} left for this month. Spend carefully.`;
+  toast(title,body,level>=100?"err":"info",null,5000);
+  if("Notification" in window&&Notification.permission==="granted"&&navigator.serviceWorker)
+    navigator.serviceWorker.ready.then(r=>r.showNotification(title,{body,icon:"/static/daily/icons/icon-192.png?v=2",tag:"budget"})).catch(()=>{});
+}
+
+/* ---------- recurring entries ---------- */
+let RECS=[],recKind="income";
+$("recDay").innerHTML=Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1}${[,"st","nd","rd"][(i+1)%10>3||[11,12,13].includes(i+1)?0:(i+1)%10]||"th"}</option>`).join("");
+function syncRecNow(){$("recNowRow").style.display=+$("recDay").value<=new Date().getDate()?"flex":"none"}
+$("recDay").onchange=syncRecNow;
+$("recKind").onclick=e=>{const b=e.target.closest("button");if(!b)return;recKind=b.dataset.k;
+  [...$("recKind").querySelectorAll("button")].forEach(x=>x.classList.toggle("on",x===b));$("recKind").classList.toggle("inc",recKind==="income");
+  $("recNote").placeholder=recKind==="income"?"Name (Salary, Rent received…)":"Name (Rent, EMI, Phone bill…)"};
+$("recKind").classList.add("inc");
+async function loadRecs(){try{RECS=await api("/api/recurring/")||[];drawRecs()}catch(e){}}
+function drawRecs(){
+  $("recList").innerHTML=RECS.length?RECS.map(r=>`<div class="srow rec ${r.active?"":"off"}">
+      <span><b class="${r.kind==="income"?"g":""}">${r.kind==="income"?"+":"−"}${money(r.amount)}</b> ${esc(r.note)}<small class="hint">Every month on day ${r.day}${r.active?"":" · paused"}</small></span>
+      <span class="recact"><button class="toggle ${r.active?"on":""}" onclick="toggleRec(${r.id})" aria-label="Pause or resume"></button><button class="recdel" onclick="delRec(${r.id})" aria-label="Delete">✕</button></span>
+    </div>`).join(""):`<div class="hint" style="padding:12px 0">Nothing yet. Add your salary below and it will be added automatically every month.</div>`;
+}
+$("recSave").onclick=async()=>{
+  const note=$("recNote").value.trim(),amt=+$("recAmt").value,day=+$("recDay").value;
+  if(!note){toast("Add a name","e.g. Salary","err");$("recNote").focus();return}
+  if(!(amt>0)){toast("Enter an amount","","err");$("recAmt").focus();return}
+  const addNow=$("recNowRow").style.display!=="none"&&$("recNow").checked;
+  try{
+    await api("/api/recurring/","POST",{kind:recKind,amount:amt.toFixed(2),note,day,add_now:addNow});
+    $("recNote").value="";$("recAmt").value="";$("recNow").checked=false;
+    await loadRecs();
+    TX=await api("/api/expenses/")||TX;refresh();refreshWallet();
+    toast("Repeat added",`${note} · every month on day ${day}${addNow?" (added for this month)":""}`);
+  }catch(e){toast("Could not save","Check your connection","err")}
+};
+async function toggleRec(id){const r=RECS.find(x=>x.id===id);if(!r)return;vib();
+  try{const u=await api(`/api/recurring/${id}/`,"PUT",{active:!r.active});Object.assign(r,u);drawRecs();toast(u.active?"Resumed":"Paused",r.note,"info")}catch(e){toast("Could not update","","err")}}
+async function delRec(id){const r=RECS.find(x=>x.id===id);if(!r||!confirm(`Stop repeating "${r.note}"? Entries already added stay.`))return;
+  try{await api(`/api/recurring/${id}/`,"DELETE");RECS=RECS.filter(x=>x.id!==id);drawRecs();toast("Repeat removed",r.note,"info")}catch(e){toast("Could not delete","","err")}}
+
+/* hook into Profile opening */
+const _fillSettings=fillSettings;
+fillSettings=function(){_fillSettings();fillGoal();fillBudAlert();syncRecNow();loadRecs();fillLock()};
+
+/* ---------- calendar (Stats) ---------- */
+let calSel=null;
+function renderCal(list,y,mo){
+  const days=new Date(y,mo+1,0).getDate(),first=(new Date(y,mo,1).getDay()+6)%7; // Monday first
+  const sp={},ic={};list.forEach(t=>{const d=+t.date.slice(8);(t.kind==="income"?ic:sp)[d]=((t.kind==="income"?ic:sp)[d]||0)+ +t.amount});
+  const mx=Math.max(1,...Object.values(sp));
+  $("calHead").innerHTML=["M","T","W","T","F","S","S"].map(d=>`<span>${d}</span>`).join("");
+  let h="";for(let i=0;i<first;i++)h+="<i></i>";
+  for(let d=1;d<=days;d++){
+    const v=sp[d]||0,lv=v?Math.min(4,1+Math.floor(v/mx*3.999)):0,ds=`${y}-${String(mo+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    h+=`<button class="cd l${lv} ${ds===TODAY?"now":""} ${ic[d]?"hasinc":""} ${calSel===ds?"sel":""}" data-d="${ds}" style="--i:${d}"><b>${d}</b>${v?`<small>${v>=1000?Math.round(v/100)/10+"k":Math.round(v)}</small>`:""}</button>`;
+  }
+  $("calGrid").innerHTML=h;
+  if(calSel&&calSel.slice(0,7)===`${y}-${String(mo+1).padStart(2,"0")}`)showCalDay(calSel,list);else $("calDay").innerHTML="";
+}
+$("calGrid").onclick=e=>{const b=e.target.closest(".cd");if(!b)return;vib();calSel=b.dataset.d;
+  [...$("calGrid").querySelectorAll(".cd")].forEach(x=>x.classList.toggle("sel",x===b));showCalDay(calSel,lastStatsList)};
+function showCalDay(ds,list){
+  const a=list.filter(t=>t.date===ds),lbl=new Date(ds+"T00:00").toLocaleDateString('en',{weekday:'long',day:'numeric',month:'short'});
+  const sp=sum(a.filter(t=>t.kind==="expense")),ic=sum(a.filter(t=>t.kind==="income"));
+  $("calDay").innerHTML=`<div class="dayhead"><span>${lbl}</span><span>${ic?`<span class="g">+${money(ic)}</span> · `:""}−${money(sp)}</span></div>`+
+    (a.length?`<div class="list">${a.map(txRow).join("")}</div>`:`<div class="hint" style="padding:6px 4px 2px">Nothing added on this day.</div>`);
+  stagger($("calDay"));
+}
+
+/* ---------- shareable monthly report ---------- */
+function loadImg(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src})}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+async function shareReport(){
+  const list=lastStatsList||[],E=list.filter(t=>t.kind==="expense"),inc=sum(list.filter(t=>t.kind==="income")),sp=sum(E),saved=inc-sp;
+  const month=statMonth.toLocaleString('en',{month:'long',year:'numeric'});
+  const by={};E.forEach(t=>{const k=(t.note||"Untitled").trim();by[k]=(by[k]||0)+ +t.amount});
+  const top=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const W=1080,H=1350,cv=document.createElement("canvas");cv.width=W;cv.height=H;const c=cv.getContext("2d");
+  const g=c.createLinearGradient(0,0,W,H);g.addColorStop(0,"#0b1a4a");g.addColorStop(.6,"#1b3a8f");g.addColorStop(1,"#0f6b4a");c.fillStyle=g;c.fillRect(0,0,W,H);
+  c.fillStyle="rgba(62,224,107,.18)";c.beginPath();c.arc(W-120,160,260,0,7);c.fill();
+  c.fillStyle="rgba(47,91,214,.35)";c.beginPath();c.arc(80,H-120,300,0,7);c.fill();
+  const logo=await loadImg("/static/daily/icons/logo-wordmark-white.png");if(logo){const lh=70;c.drawImage(logo,80,90,logo.width*lh/logo.height,lh)}
+  c.fillStyle="rgba(255,255,255,.75)";c.font="600 38px Inter, sans-serif";c.fillText("Monthly report",80,230);
+  c.fillStyle="#fff";c.font="800 76px Inter, sans-serif";c.fillText(month,80,320);
+  const cards=[["Income",inc,"#7ff0a6"],["Spent",sp,"#ffb4c0"],[saved<0?"Overspent":"Saved",Math.abs(saved),saved<0?"#ffb4c0":"#ffffff"]];
+  cards.forEach(([l,v,col],i)=>{const x=80+i*310,y=380;c.fillStyle="rgba(255,255,255,.1)";rr(c,x,y,290,170,28);c.fill();
+    c.fillStyle="rgba(255,255,255,.7)";c.font="600 30px Inter, sans-serif";c.fillText(l,x+28,y+60);
+    c.fillStyle=col;c.font="800 46px Inter, sans-serif";c.fillText(fmt0(v),x+28,y+125)});
+  c.fillStyle="#fff";c.font="700 40px Inter, sans-serif";c.fillText("Top spends",80,650);
+  const mx=top.length?top[0][1]:1;
+  top.forEach(([n,v],i)=>{const y=700+i*105;c.fillStyle="rgba(255,255,255,.9)";c.font="600 34px Inter, sans-serif";
+    c.fillText(n.length>18?n.slice(0,17)+"…":n,80,y+36);c.textAlign="right";c.fillText(fmt0(v),W-80,y+36);c.textAlign="left";
+    c.fillStyle="rgba(255,255,255,.12)";rr(c,80,y+54,W-160,16,8);c.fill();c.fillStyle=["#3ee06b","#6d93ff","#f5a524","#ff8aa0","#5eead4"][i];rr(c,80,y+54,Math.max(16,(W-160)*v/mx),16,8);c.fill()});
+  if(!top.length){c.fillStyle="rgba(255,255,255,.6)";c.font="500 32px Inter, sans-serif";c.fillText("No spends this month",80,720)}
+  const s=calcStreaks();c.fillStyle="rgba(255,255,255,.1)";rr(c,80,1230-60,W-160,90,24);c.fill();
+  c.fillStyle="#fff";c.font="700 32px Inter, sans-serif";c.fillText(`${E.length} spends tracked · best streak ${s.best} days`,110,1228);
+  c.fillStyle="rgba(255,255,255,.55)";c.font="500 26px Inter, sans-serif";c.textAlign="right";c.fillText("chilavu.vercel.app",W-80,1310);c.textAlign="left";
+  cv.toBlob(async blob=>{
+    const file=new File([blob],`chilavu-${statMonth.getFullYear()}-${String(statMonth.getMonth()+1).padStart(2,"0")}.png`,{type:"image/png"});
+    try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"Chilavu · "+month});return}}catch(e){if(e.name==="AbortError")return}
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    toast("Report saved","Check your downloads","ok");
+  },"image/png");
+}
+
+/* ---------- restore from backup ---------- */
+$("restoreFile").onchange=async e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  let data;try{data=JSON.parse(await f.text())}catch(err){toast("Not a backup file","Choose a chilavu-backup .json file","err");return}
+  if(data.app!=="chilavu"){toast("Not a Chilavu backup","Choose a chilavu-backup .json file","err");return}
+  if(!confirm(`Restore ${(data.entries||[]).length} entries from ${data.exported||"this backup"}? Entries you already have are skipped.`))return;
+  try{const r=await api("/api/restore/","POST",data);TX=await api("/api/expenses/")||TX;refresh();loadRecs();refreshWallet();
+    toast("Backup restored",`${r.added} added · ${r.skipped} skipped${r.recurring_added?` · ${r.recurring_added} repeats`:""}`,"ok",null,5000)}
+  catch(err){toast("Restore failed","The file may be damaged","err")}
+};
+
+/* ---------- optional app lock (PIN + fingerprint) ---------- */
+const LOCK={get on(){return lsGet("lockOn")==="1"},get bio(){return lsGet("lockBio")||""}};
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))),unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function hashPin(pin){let salt=lsGet("lockSalt");if(!salt){salt=b64(crypto.getRandomValues(new Uint8Array(16)));lsSet("lockSalt",salt)}
+  return b64(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(salt+":"+pin)))}
+let pinBuf="",pinMode="unlock",pinFirst="";
+$("pinpad").innerHTML=["1","2","3","4","5","6","7","8","9","bio","0","del"].map(k=>`<button data-k="${k}" class="${k==="bio"?"pbio":k==="del"?"pdel":""}">${k==="bio"?"":k==="del"?"⌫":k}</button>`).join("");
+function drawDots(err){[...$("lockDots").children].forEach((d,i)=>d.classList.toggle("on",i<pinBuf.length));
+  if(err){$("lockDots").classList.remove("shake");void $("lockDots").offsetWidth;$("lockDots").classList.add("shake");navigator.vibrate&&navigator.vibrate([30,40,30])}}
+function showLock(mode){
+  pinMode=mode;pinBuf="";drawDots();const L=$("lock");L.classList.add("on");document.documentElement.classList.add("locked");
+  const canBio=mode==="unlock"&&LOCK.bio&&window.PublicKeyCredential;
+  L.querySelector(".pbio").innerHTML=canBio?'<svg viewBox="0 0 24 24" class="i"><path d="M12 11v4M8.5 8.5A5 5 0 0 1 17 12v2M7 12v1a5 5 0 0 0 .8 2.7M12 3a9 9 0 0 1 9 9v1M3 13v-1a9 9 0 0 1 4-7.5M16 17.5a9 9 0 0 1-1 2.5"/></svg>':"";
+  L.querySelector(".pbio").disabled=!canBio;
+  $("lockTitle").textContent={unlock:"Enter PIN",set:"Create a 4-digit PIN",confirm:"Enter the PIN again",verify:"Enter your current PIN"}[mode];
+  $("lockSub").textContent={unlock:"Chilavu is locked",set:"You'll use it to open Chilavu",confirm:"Just to be sure",verify:"To change your lock settings"}[mode];
+  $("lockForgot").style.display=mode==="unlock"?"block":"none";
+  $("lockForgot").textContent="Forgot PIN? Sign out";
+  if(mode!=="unlock")$("lockForgot").style.display="block",$("lockForgot").textContent="Cancel";
+  if(canBio)setTimeout(bioUnlock,500);
+}
+function hideLock(){$("lock").classList.remove("on");document.documentElement.classList.remove("locked")}
+let verifyThen=null;
+$("pinpad").onclick=async e=>{
+  const b=e.target.closest("button");if(!b||b.disabled)return;vib();const k=b.dataset.k;
+  if(k==="bio")return bioUnlock();
+  if(k==="del"){pinBuf=pinBuf.slice(0,-1);drawDots();return}
+  if(pinBuf.length>=4)return;pinBuf+=k;drawDots();if(pinBuf.length<4)return;
+  await new Promise(r=>setTimeout(r,120));
+  if(pinMode==="unlock"||pinMode==="verify"){
+    if(await hashPin(pinBuf)===lsGet("lockPin")){hideLock();lastActive=Date.now();if(pinMode==="verify"&&verifyThen){const f=verifyThen;verifyThen=null;f()}}
+    else{pinBuf="";drawDots(true);$("lockSub").textContent="Wrong PIN, try again"}
+  }else if(pinMode==="set"){pinFirst=pinBuf;showLock("confirm")}
+  else if(pinMode==="confirm"){
+    if(pinBuf===pinFirst){lsSet("lockPin",await hashPin(pinBuf));lsSet("lockOn","1");hideLock();fillLock();
+      toast("App lock on","Chilavu will ask for your PIN when it opens");offerBio()}
+    else{pinFirst="";showLock("set");$("lockSub").textContent="PINs didn't match. Try again";drawDots(true)}
+  }
+};
+$("lockForgot").onclick=()=>{
+  if(pinMode!=="unlock"){hideLock();verifyThen=null;fillLock();return}
+  if(!confirm("Sign out to reset the app lock? You'll sign in again with your password."))return;
+  ["lockOn","lockPin","lockBio","lockSalt"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});location.href="/logout/";
+};
+function fillLock(){
+  $("lockT").classList.toggle("on",LOCK.on);$("pinChRow").style.display=LOCK.on?"flex":"none";
+  const bioOK=!!(window.PublicKeyCredential&&isSecureContext);
+  $("bioRow").style.display=LOCK.on&&bioOK?"flex":"none";$("bioT").classList.toggle("on",!!LOCK.bio);
+  $("lockHint").textContent=LOCK.on?"On — asks for your PIN when the app opens":"Off — turn on to ask for a PIN when the app opens";
+}
+function requirePin(then){verifyThen=then;showLock("verify")}
+$("lockT").onclick=()=>{
+  if(!LOCK.on){showLock("set");return}
+  requirePin(()=>{["lockOn","lockPin","lockBio"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});fillLock();toast("App lock off","","info")});
+};
+$("pinCh").onclick=()=>requirePin(()=>showLock("set"));
+/* fingerprint / face via the phone's built-in screen lock (WebAuthn, stays on this device) */
+async function offerBio(){
+  if(!(window.PublicKeyCredential&&isSecureContext))return;
+  try{if(!await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())return}catch(e){return}
+  if(confirm("Also unlock with your fingerprint or face?"))enableBio();
+}
+async function enableBio(){
+  try{
+    const cred=await navigator.credentials.create({publicKey:{
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      rp:{name:"Chilavu",id:location.hostname},
+      user:{id:crypto.getRandomValues(new Uint8Array(16)),name:"chilavu-lock",displayName:"Chilavu app lock"},
+      pubKeyCredParams:[{type:"public-key",alg:-7},{type:"public-key",alg:-257}],
+      authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required",residentKey:"discouraged"},timeout:60000}});
+    lsSet("lockBio",b64(cred.rawId));fillLock();toast("Fingerprint unlock on","")
+  }catch(e){toast("Fingerprint not set up","You can still use your PIN","info")}
+}
+async function bioUnlock(){
+  if(!LOCK.bio)return;
+  try{await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rpId:location.hostname,
+      allowCredentials:[{type:"public-key",id:unb64(LOCK.bio)}],userVerification:"required",timeout:60000}});
+    hideLock();lastActive=Date.now()}catch(e){}
+}
+$("bioT").onclick=()=>{if(LOCK.bio){requirePin(()=>{try{localStorage.removeItem("lockBio")}catch(e){}fillLock();toast("Fingerprint unlock off","","info")})}else enableBio()};
+/* lock on open, and again after 1 minute in the background */
+let lastActive=Date.now();
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="hidden")lastActive=Date.now();
+  else if(LOCK.on&&Date.now()-lastActive>60000&&!$("lock").classList.contains("on"))showLock("unlock");
+});
+if(LOCK.on)showLock("unlock");
 </script>
 {% endblock %}

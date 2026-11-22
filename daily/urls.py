@@ -14,6 +14,12 @@ from .views import (
     export_expenses_csv,
     web_manifest,
     service_worker,
+    RecurringListApi,
+    RecurringDetailApi,
+    RestoreApi,
+    RecoveryCodeApi,
+    backup_download,
+    forgot_password_page,
 )
 
 urlpatterns = [
@@ -25,6 +31,12 @@ urlpatterns = [
     path("export.csv", export_expenses_csv, name="export-csv"),
     path("manifest.webmanifest", web_manifest, name="manifest"),
     path("sw.js", service_worker, name="sw"),
+    path("api/recurring/", RecurringListApi.as_view(), name="recurring-list"),
+    path("api/recurring/<int:pk>/", RecurringDetailApi.as_view(), name="recurring-detail"),
+    path("api/restore/", RestoreApi.as_view(), name="restore"),
+    path("api/recovery/", RecoveryCodeApi.as_view(), name="recovery"),
+    path("backup.json", backup_download, name="backup"),
+    path("forgot/", forgot_password_page, name="forgot"),
 
     # Old habit tracker (kept)
     path("daily/", daily_page, name="daily-page"),

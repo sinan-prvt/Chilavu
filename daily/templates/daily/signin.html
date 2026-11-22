@@ -7,6 +7,7 @@
   <label>Username</label><input class="field" name="username" autocomplete="username" required value="{{ form.username.value|default:'' }}">
   <label>Password</label><input class="field" type="password" name="password" autocomplete="current-password" required>
   <button class="btn" type="submit">Sign in</button>
+  <a href="/forgot/" style="text-align:center;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none">Forgot password?</a>
 </form>
 <p class="alt">New here? <a href="/signup/">Create account</a></p>
 {% endblock %}

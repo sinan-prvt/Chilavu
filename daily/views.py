@@ -246,6 +246,7 @@ class ExpenseListApi(APIView):
     """GET ?month=YYYY-MM (default: all of current & last 2 months) ; POST create."""
 
     def get(self, request):
+        apply_recurring(request.user)   # add any salary/rent etc. that became due
         qs = Expense.objects.filter(user=request.user)
         month = request.GET.get("month")
         if month:
@@ -280,14 +281,18 @@ class ExpenseDetailApi(APIView):
 class WalletSettingsApi(APIView):
     def get(self, request):
         w, _ = WalletSettings.objects.get_or_create(user=request.user)
-        return Response(WalletSettingsSerializer(w).data)
+        return Response({**WalletSettingsSerializer(w).data, "goal_saved": str(goal_progress(request.user, w))})
 
     def post(self, request):
         w, _ = WalletSettings.objects.get_or_create(user=request.user)
-        s = WalletSettingsSerializer(w, data=request.data, partial=True)
+        data = dict(request.data)
+        # setting a new goal (or changing its target) restarts progress from today
+        if "goal_amount" in data and str(data.get("goal_amount")) != str(w.goal_amount):
+            data["goal_since"] = date.today().isoformat() if float(data.get("goal_amount") or 0) > 0 else None
+        s = WalletSettingsSerializer(w, data=data, partial=True)
         s.is_valid(raise_exception=True)
         s.save()
-        return Response(s.data)
+        return Response({**s.data, "goal_saved": str(goal_progress(request.user, w))})
 
 
 @login_required
@@ -345,3 +350,203 @@ def service_worker(request):
     resp = HttpResponse(render_to_string("daily/sw.js"), content_type="application/javascript")
     resp["Service-Worker-Allowed"] = "/"
     return resp
+
+
+# ---------- RECURRING ENTRIES (salary, rent, EMI…) ----------
+
+import calendar
+import json
+import secrets
+from decimal import Decimal, InvalidOperation
+
+from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.models import User as AuthUser
+from django.db.models import Sum
+from .models import Recurring
+from .serializers import RecurringSerializer
+
+
+def _month_key(d):
+    return f"{d.year:04d}-{d.month:02d}"
+
+
+def _due_date(rec, d):
+    """The date this recurring entry falls on in d's month (day clamped to month length)."""
+    last = calendar.monthrange(d.year, d.month)[1]
+    return date(d.year, d.month, min(rec.day, last))
+
+
+def apply_recurring(user, today=None):
+    """Add this month's recurring entries that are due and not added yet."""
+    today = today or date.today()
+    key = _month_key(today)
+    for rec in Recurring.objects.filter(user=user, active=True).exclude(last_applied=key):
+        due = _due_date(rec, today)
+        if today >= due:
+            Expense.objects.create(user=user, kind=rec.kind, amount=rec.amount, note=rec.note,
+                                   category="recurring", date=due)
+            rec.last_applied = key
+            rec.save(update_fields=["last_applied"])
+
+
+@method_decorator(login_required, name="dispatch")
+class RecurringListApi(APIView):
+    def get(self, request):
+        return Response(RecurringSerializer(Recurring.objects.filter(user=request.user), many=True).data)
+
+    def post(self, request):
+        s = RecurringSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        rec = s.save(user=request.user)
+        today = date.today()
+        # If this month's date has already passed, only add it now when asked to
+        # (avoids a duplicate when this month's salary was already entered by hand).
+        if today >= _due_date(rec, today) and not request.data.get("add_now"):
+            rec.last_applied = _month_key(today)
+            rec.save(update_fields=["last_applied"])
+        apply_recurring(request.user)
+        rec.refresh_from_db()
+        return Response(RecurringSerializer(rec).data, status=201)
+
+
+@method_decorator(login_required, name="dispatch")
+class RecurringDetailApi(APIView):
+    def put(self, request, pk):
+        rec = get_object_or_404(Recurring, pk=pk, user=request.user)
+        s = RecurringSerializer(rec, data=request.data, partial=True)
+        s.is_valid(raise_exception=True)
+        s.save()
+        return Response(s.data)
+
+    def delete(self, request, pk):
+        get_object_or_404(Recurring, pk=pk, user=request.user).delete()
+        return Response(status=204)
+
+
+def goal_progress(user, wallet):
+    """Money saved since the goal was set: income minus spending."""
+    if not wallet.goal_since or not wallet.goal_amount:
+        return 0
+    qs = Expense.objects.filter(user=user, date__gte=wallet.goal_since)
+    inc = qs.filter(kind="income").aggregate(s=Sum("amount"))["s"] or 0
+    exp = qs.filter(kind="expense").aggregate(s=Sum("amount"))["s"] or 0
+    return max(Decimal(0), inc - exp)
+
+
+# ---------- BACKUP / RESTORE ----------
+
+@login_required
+def backup_download(request):
+    u = request.user
+    w, _ = WalletSettings.objects.get_or_create(user=u)
+    data = {
+        "app": "chilavu", "version": 1, "exported": date.today().isoformat(), "username": u.username,
+        "settings": {"monthly_budget": str(w.monthly_budget), "currency": w.currency,
+                     "goal_name": w.goal_name, "goal_amount": str(w.goal_amount),
+                     "goal_since": w.goal_since.isoformat() if w.goal_since else None},
+        "entries": [{"kind": e.kind, "amount": str(e.amount), "note": e.note, "date": e.date.isoformat(),
+                     "category": e.category} for e in Expense.objects.filter(user=u).order_by("date", "id")],
+        "recurring": [{"kind": r.kind, "amount": str(r.amount), "note": r.note, "day": r.day,
+                       "active": r.active, "last_applied": r.last_applied}
+                      for r in Recurring.objects.filter(user=u)],
+    }
+    resp = HttpResponse(json.dumps(data, ensure_ascii=False, indent=1), content_type="application/json")
+    resp["Content-Disposition"] = f'attachment; filename="chilavu-backup-{date.today().isoformat()}.json"'
+    return resp
+
+
+@method_decorator(login_required, name="dispatch")
+class RestoreApi(APIView):
+    """Merge a backup file into this account. Entries already present are skipped."""
+
+    def post(self, request):
+        data = request.data
+        if not isinstance(data, dict) or data.get("app") != "chilavu":
+            return Response({"detail": "This is not a Chilavu backup file."}, status=400)
+        u = request.user
+        existing = set(Expense.objects.filter(user=u).values_list("kind", "amount", "note", "date"))
+        added = skipped = 0
+        new = []
+        for e in data.get("entries", [])[:20000]:
+            try:
+                kind = "income" if e.get("kind") == "income" else "expense"
+                amt = Decimal(str(e["amount"])).quantize(Decimal("0.01"))
+                d = datetime.strptime(e["date"], "%Y-%m-%d").date()
+                note = str(e.get("note", ""))[:200]
+            except (KeyError, ValueError, TypeError, InvalidOperation):
+                skipped += 1
+                continue
+            if amt <= 0 or (kind, amt, note, d) in existing:
+                skipped += 1
+                continue
+            existing.add((kind, amt, note, d))
+            new.append(Expense(user=u, kind=kind, amount=amt, note=note, date=d,
+                               category=str(e.get("category", "other"))[:30]))
+            added += 1
+        Expense.objects.bulk_create(new)
+
+        have = set(Recurring.objects.filter(user=u).values_list("kind", "note", "day"))
+        rec_added = 0
+        for r in data.get("recurring", [])[:200]:
+            try:
+                key = ("income" if r.get("kind") == "income" else "expense", str(r["note"])[:200], int(r["day"]))
+                amt = Decimal(str(r["amount"]))
+            except (KeyError, ValueError, TypeError, InvalidOperation):
+                continue
+            if key in have or amt <= 0 or not 1 <= key[2] <= 31:
+                continue
+            Recurring.objects.create(user=u, kind=key[0], note=key[1], day=key[2], amount=amt,
+                                     active=bool(r.get("active", True)),
+                                     last_applied=str(r.get("last_applied", ""))[:7])
+            have.add(key)
+            rec_added += 1
+        return Response({"added": added, "skipped": skipped, "recurring_added": rec_added})
+
+
+# ---------- RECOVERY CODE (forgot password without email) ----------
+
+def _new_recovery_code():
+    raw = secrets.token_hex(6).upper()            # 12 hex characters
+    return "-".join(raw[i:i + 4] for i in range(0, 12, 4))
+
+
+@method_decorator(login_required, name="dispatch")
+class RecoveryCodeApi(APIView):
+    def get(self, request):
+        w, _ = WalletSettings.objects.get_or_create(user=request.user)
+        return Response({"has_code": bool(w.recovery_hash)})
+
+    def post(self, request):
+        """Create (or replace) the recovery code. The plain code is shown only once."""
+        w, _ = WalletSettings.objects.get_or_create(user=request.user)
+        code = _new_recovery_code()
+        w.recovery_hash = make_password(code)
+        w.save(update_fields=["recovery_hash"])
+        return Response({"code": code})
+
+
+def forgot_password_page(request):
+    ctx = {}
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        code = request.POST.get("code", "").strip().upper().replace(" ", "")
+        if code and "-" not in code and len(code) == 12:
+            code = "-".join(code[i:i + 4] for i in range(0, 12, 4))
+        pw1, pw2 = request.POST.get("password", ""), request.POST.get("password2", "")
+        ctx["username"] = username
+        user = AuthUser.objects.filter(username__iexact=username).first()
+        w = WalletSettings.objects.filter(user=user).first() if user else None
+        if not (user and w and w.recovery_hash and check_password(code, w.recovery_hash)):
+            ctx["error"] = "Username or recovery code is not correct."
+        elif len(pw1) < 6:
+            ctx["error"] = "New password must be at least 6 characters."
+        elif pw1 != pw2:
+            ctx["error"] = "The two passwords do not match."
+        else:
+            user.set_password(pw1)
+            user.save()
+            w.recovery_hash = ""                       # a code works only once
+            w.save(update_fields=["recovery_hash"])
+            login(request, user)
+            return redirect("/?recovered=1")
+    return render(request, "daily/forgot.html", ctx)

@@ -96,7 +96,7 @@ svg.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stro
 <script>
 (function(){
   var show=false;
-  var p=location.pathname,authPage=p.indexOf("/signin")===0||p.indexOf("/signup")===0,justIn=false,isNew=false;
+  var p=location.pathname,authPage=p.indexOf("/signin")===0||p.indexOf("/signup")===0||p.indexOf("/forgot")===0,justIn=false,isNew=false;
   try{
     var js=sessionStorage.getItem("justSignedIn");justIn=!authPage&&!!js;isNew=js==="new";
     if(!authPage)sessionStorage.removeItem("justSignedIn");

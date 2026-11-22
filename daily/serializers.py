@@ -25,4 +25,23 @@ class ExpenseSerializer(serializers.ModelSerializer):
 class WalletSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = WalletSettings
-        fields = ["monthly_budget", "currency"]
+        fields = ["monthly_budget", "currency", "goal_name", "goal_amount", "goal_since"]
+
+from .models import Recurring
+
+
+class RecurringSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recurring
+        fields = ["id", "kind", "amount", "note", "day", "active", "last_applied"]
+        read_only_fields = ["id", "last_applied"]
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Amount must be greater than 0.")
+        return value
+
+    def validate_day(self, value):
+        if not 1 <= value <= 31:
+            raise serializers.ValidationError("Day must be between 1 and 31.")
+        return value
