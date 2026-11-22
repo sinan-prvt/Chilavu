@@ -57,14 +57,14 @@ svg.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stro
 <!-- Apple-style "hello" intro (once per visit) -->
 <div id="intro" aria-hidden="true">
   <img class="imark" src="/static/daily/icons/logo-mark.png" alt="">
-  <svg viewBox="0 0 600 220" class="hello">
+  <svg viewBox="0 0 600 200" class="hello">
     <defs>
       <linearGradient id="hg" x1="0" x2="1">
-        <stop offset="0" stop-color="#0b1a4a"/><stop offset=".45" stop-color="#1d3fa6"/>
-        <stop offset=".75" stop-color="#12b76a"/><stop offset="1" stop-color="#3ee06b"/>
+        <stop offset="0" stop-color="#0b1a4a"/><stop offset=".5" stop-color="#1b3a8f"/>
+        <stop offset=".82" stop-color="#0f9a52"/><stop offset="1" stop-color="#16c25f"/>
       </linearGradient>
     </defs>
-    <text x="50%" y="62%" text-anchor="middle" class="hw">Chilavu</text>
+    <text x="50%" y="150" text-anchor="middle" class="hw">Chilavu</text>
   </svg>
   <div class="tag" id="introTag" data-user="{% if user.is_authenticated %}{{ user.username|title }}{% endif %}">Track every rupee, every day</div>
 </div>
@@ -72,26 +72,24 @@ svg.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stro
 #intro{position:fixed;inset:0;z-index:999;display:none;flex-direction:column;align-items:center;justify-content:center;background:var(--bg)}
 /* plain background first (same as Android's splash), soft glow fades in */
 #intro::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 360px at 50% 40%,var(--primary-soft),transparent 70%);
-  opacity:0;animation:glowIn 1.2s ease .5s forwards;pointer-events:none}
+  opacity:0;animation:glowIn 1.2s ease .5s forwards;pointer-events:none;z-index:-1}
 @keyframes glowIn{to{opacity:1}}
 .intro-on #intro{display:flex}
 .intro-on body{overflow:hidden}
 .intro-on body>*:not(#intro),.intro-on body>*:not(#intro) *{animation-play-state:paused!important}
-#intro .hello{width:min(88vw,520px);overflow:visible;margin-top:-10px}
+#intro .hello{display:block;width:min(84vw,460px);overflow:visible;margin-top:22px}
 /* icon starts big in the screen centre (where the splash icon was), then glides up */
 #intro .imark{position:relative;width:76px;height:76px;border-radius:22px;box-shadow:0 18px 40px -12px rgba(20,40,120,.45);
   transform:translateY(var(--dy,0px)) scale(1.6);animation:imUp .9s cubic-bezier(.65,0,.25,1) .25s forwards}
 @keyframes imUp{60%{transform:translateY(-6px) scale(.96)}100%{transform:none}}
-#intro .hw{font-family:"Dancing Script",cursive;font-weight:700;font-size:150px;fill:url(#hg);fill-opacity:0;
-  stroke:url(#hg);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1400;stroke-dashoffset:1400;
-  animation:hwDraw 2s cubic-bezier(.55,.1,.35,1) .75s forwards,hwFill .6s ease 2.5s forwards}
-#intro .ml{font-family:"Noto Sans Malayalam",sans-serif;font-weight:800;font-size:26px;color:var(--text);margin-top:-6px;
-  opacity:0;filter:blur(8px);transform:translateY(10px);animation:mlIn .8s ease 2.3s forwards}
-#intro .tag{font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:10px;
+#intro .hw{font-family:"Dancing Script",cursive;font-weight:700;font-size:140px;fill:url(#hg);fill-opacity:0;
+  stroke:url(#hg);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1400;stroke-dashoffset:1400;
+  animation:hwDraw 2s cubic-bezier(.55,.1,.35,1) .75s forwards,hwFill .5s ease 2.45s forwards}
+#intro .tag{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:14px;
   opacity:0;animation:mlIn .7s ease 2.7s forwards}
 #intro.bye{animation:introOut .8s cubic-bezier(.7,0,.3,1) forwards}
 @keyframes hwDraw{to{stroke-dashoffset:0}}
-@keyframes hwFill{to{fill-opacity:1;stroke-width:0}}
+@keyframes hwFill{to{fill-opacity:1;stroke-width:.6}}
 @keyframes mlIn{to{opacity:1;filter:blur(0);transform:none}}
 @keyframes introOut{to{opacity:0;transform:scale(1.12);filter:blur(10px);visibility:hidden}}
 </style>
