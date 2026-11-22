@@ -801,7 +801,7 @@ html.locked body{overflow:hidden}
     <h2>Account</h2>
     <div class="card set">
       <div class="srow">Install app<a href="#" id="installLink">Add to home screen</a></div>
-      <div class="srow">Account<a href="/logout/" style="color:var(--red)">Log out</a></div>
+      <div class="srow">Account<button class="linkbtn" style="color:var(--red)" onclick="doLogout()">Log out</button></div>
     </div>
   </section>
 </div>
@@ -1558,7 +1558,7 @@ $("pinpad").onclick=async e=>{
 $("lockForgot").onclick=()=>{
   if(pinMode!=="unlock"){hideLock();verifyThen=null;fillLock();return}
   if(!confirm("Sign out to reset the app lock? You'll sign in again with your password."))return;
-  ["lockOn","lockPin","lockBio","lockSalt"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});location.href="/logout/";
+  ["lockOn","lockPin","lockBio","lockSalt"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});doLogout();
 };
 function fillLock(){
   $("lockT").classList.toggle("on",LOCK.on);$("pinChRow").style.display=LOCK.on?"flex":"none";
@@ -1606,6 +1606,15 @@ if(LOCK.on)showLock("unlock");
 </script>
 
 <script>
+/* ================= SAFE LOGOUT ================= */
+function doLogout(){
+  const n=(typeof outbox==="function")?outbox().length:0;
+  if(n&&!confirm(`${n} ${n>1?"entries are":"entry is"} not synced yet and will be lost. Log out anyway?`))return;
+  const f=document.createElement("form");f.method="post";f.action="/logout/";
+  f.innerHTML=`<input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">`;
+  document.body.appendChild(f);f.submit();
+}
+
 /* ================= LEND & BORROW ================= */
 let LOANS=[],lKind="lent",showDone=false;
 const _go=go;go=function(p){_go(p);if(p==="loans")renderLoans()};

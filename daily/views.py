@@ -16,15 +16,31 @@ from .serializers import DailyRoutineSerializer
 
 # ---------- AUTH ----------
 
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.views.decorators.http import require_POST
+from .security import (client_ip, wait_message, SIGNIN_USER, SIGNIN_IP, SIGNUP_IP)
+
+
 def signup_page(request):
     if request.method == "POST":
         form = SignupForm(request.POST)
-        if form.is_valid():
+        ip = client_ip(request)
+        wait = SIGNUP_IP.blocked(ip)
+        if wait:
+            form.add_error(None, wait_message(wait))
+        elif form.is_valid():
             user = form.save(commit=False)
-            user.set_password(form.cleaned_data["password"])
-            user.save()
-            login(request, user)
-            return redirect("/")
+            try:
+                validate_password(form.cleaned_data["password"], user)
+            except ValidationError as e:
+                form.add_error("password", e)
+            else:
+                user.set_password(form.cleaned_data["password"])
+                user.save()
+                SIGNUP_IP.hit(ip)
+                login(request, user)
+                return redirect("/")
     else:
         form = SignupForm()
     return render(request, "daily/signup.html", {"form": form})
@@ -34,26 +50,31 @@ def signin_page(request):
     if request.method == "POST":
         form = SigninForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data["username"]
+            username = form.cleaned_data["username"].strip()
             password = form.cleaned_data["password"]
-            user = authenticate(username=username, password=password)
+            ip = client_ip(request)
+            user_key = f"{username.lower()}|{ip}"
+            wait = SIGNIN_USER.blocked(user_key) or SIGNIN_IP.blocked(ip)
+            if wait:
+                return render(request, "daily/signin.html", {"form": form, "error": wait_message(wait)}, status=429)
+            user = authenticate(request, username=username, password=password)
             if user:
+                SIGNIN_USER.reset(user_key)
                 login(request, user)
                 return redirect("/")
-            else:
-                return render(
-                    request,
-                    "daily/signin.html",
-                    {"form": form, "error": "Invalid username or password"},
-                )
+            SIGNIN_USER.hit(user_key)
+            SIGNIN_IP.hit(ip)
+            return render(request, "daily/signin.html", {"form": form, "error": "Invalid username or password"})
     else:
         form = SigninForm()
     return render(request, "daily/signin.html", {"form": form})
 
 
+@require_POST
 def logout_user(request):
+    # POST only, protected by CSRF, so other websites can't sign you out
     logout(request)
-    return redirect("/signin/")
+    return redirect("/signin/?bye=1")
 
 
 # ---------- DAILY PAGE ----------
@@ -250,7 +271,12 @@ class ExpenseListApi(APIView):
         qs = Expense.objects.filter(user=request.user)
         month = request.GET.get("month")
         if month:
-            y, m = map(int, month.split("-"))
+            try:
+                y, m = map(int, month.split("-"))
+                if not (2000 <= y <= 2100 and 1 <= m <= 12):
+                    raise ValueError
+            except ValueError:
+                return Response({"detail": "month must look like YYYY-MM"}, status=400)
             qs = qs.filter(date__year=y, date__month=m)
         else:
             qs = qs.filter(date__gte=date.today() - timedelta(days=120))
@@ -287,8 +313,13 @@ class WalletSettingsApi(APIView):
         w, _ = WalletSettings.objects.get_or_create(user=request.user)
         data = dict(request.data)
         # setting a new goal (or changing its target) restarts progress from today
+        data.pop("goal_since", None)          # only the server sets this
         if "goal_amount" in data and str(data.get("goal_amount")) != str(w.goal_amount):
-            data["goal_since"] = date.today().isoformat() if float(data.get("goal_amount") or 0) > 0 else None
+            try:
+                amount = float(data.get("goal_amount") or 0)
+            except (TypeError, ValueError):
+                return Response({"goal_amount": ["Enter a number."]}, status=400)
+            data["goal_since"] = date.today().isoformat() if amount > 0 else None
         s = WalletSettingsSerializer(w, data=data, partial=True)
         s.is_valid(raise_exception=True)
         s.save()
@@ -300,10 +331,16 @@ def export_expenses_csv(request):
     resp = HttpResponse(content_type="text/csv")
     resp["Content-Disposition"] = 'attachment; filename="expenses.csv"'
     w = csv.writer(resp)
-    w.writerow(["date", "name", "amount"])
-    for e in Expense.objects.filter(user=request.user, kind="expense").order_by("date"):
-        w.writerow([e.date, e.note, e.amount])
+    w.writerow(["date", "type", "name", "amount"])
+    for e in Expense.objects.filter(user=request.user).order_by("date"):
+        w.writerow([e.date, e.kind, _csv_safe(e.note), e.amount])
     return resp
+
+
+def _csv_safe(text):
+    """Stop spreadsheet formula injection: cells starting with = + - @ are treated as text."""
+    text = text or ""
+    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
 
 
 # ---------- PWA (installable app) ----------
@@ -550,15 +587,30 @@ def forgot_password_page(request):
             code = "-".join(code[i:i + 4] for i in range(0, 12, 4))
         pw1, pw2 = request.POST.get("password", ""), request.POST.get("password2", "")
         ctx["username"] = username
+        from .security import FORGOT_USER, FORGOT_IP
+        ip = client_ip(request)
+        wait = FORGOT_USER.blocked(username.lower()) or FORGOT_IP.blocked(ip)
+        if wait:
+            ctx["error"] = wait_message(wait)
+            return render(request, "daily/forgot.html", ctx, status=429)
         user = AuthUser.objects.filter(username__iexact=username).first()
         w = WalletSettings.objects.filter(user=user).first() if user else None
+        pw_error = None
+        if user and pw1:
+            try:
+                validate_password(pw1, user)
+            except ValidationError as e:
+                pw_error = " ".join(e.messages)
         if not (user and w and w.recovery_hash and check_password(code, w.recovery_hash)):
+            FORGOT_USER.hit(username.lower())
+            FORGOT_IP.hit(ip)
             ctx["error"] = "Username or recovery code is not correct."
-        elif len(pw1) < 6:
-            ctx["error"] = "New password must be at least 6 characters."
+        elif pw_error:
+            ctx["error"] = pw_error
         elif pw1 != pw2:
             ctx["error"] = "The two passwords do not match."
         else:
+            FORGOT_USER.reset(username.lower())
             user.set_password(pw1)
             user.save()
             w.recovery_hash = ""                       # a code works only once

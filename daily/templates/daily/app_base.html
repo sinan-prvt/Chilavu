@@ -52,7 +52,13 @@ svg.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stro
 </style>
 </head>
 <body>
-<script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||'light'}catch(e){}</script>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||'light'}catch(e){}
+/* after logout: remove this account's data cached on the device */
+if(/[?&]bye=1/.test(location.search)){
+  try{["cacheTX","cacheWallet","cacheLoans","outbox","lockOn","lockPin","lockBio","lockSalt","installDismissed"].forEach(function(k){localStorage.removeItem(k)})}catch(e){}
+  try{caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}catch(e){}
+  history.replaceState(null,"",location.pathname);
+}</script>
 
 <!-- Apple-style "hello" intro (once per visit) -->
 <div id="intro" aria-hidden="true">

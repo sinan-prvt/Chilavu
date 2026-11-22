@@ -23,21 +23,34 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY",
-    "django-insecure-local-dev-only-change-me",  # real key comes from Vercel env vars
-)
+ON_VERCEL = bool(os.environ.get("VERCEL"))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG is on locally, off on Vercel (VERCEL env var is set there automatically)
-DEBUG = os.environ.get("DEBUG", "0" if os.environ.get("VERCEL") else "1") == "1"
+DEBUG = os.environ.get("DEBUG", "0" if ON_VERCEL else "1") == "1"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".vercel.app"] + [
-    h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()
-]
-CSRF_TRUSTED_ORIGINS = ["https://*.vercel.app"] + [
+SECRET_KEY = os.environ.get("SECRET_KEY", "")
+if not SECRET_KEY:
+    if not DEBUG:
+        # Never run in production with a guessable key (it would allow forged logins).
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured("SECRET_KEY environment variable is required in production.")
+    SECRET_KEY = "django-insecure-local-dev-only"  # local development only
+
+# Only the real app addresses may serve the site (not any *.vercel.app).
+# Vercel provides these system variables automatically.
+_hosts = {"chilavu.vercel.app"}
+for _v in ("VERCEL_PROJECT_PRODUCTION_URL", "VERCEL_URL", "VERCEL_BRANCH_URL"):
+    if os.environ.get(_v):
+        _hosts.add(os.environ[_v].strip())
+_hosts.update(h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip())
+ALLOWED_HOSTS = sorted(_hosts) + (["localhost", "127.0.0.1"] if DEBUG or not ON_VERCEL else [])
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in sorted(_hosts)] + [
     o.strip() for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()
 ]
+
+# Admin panel lives at a non-obvious address (override with ADMIN_URL env var).
+ADMIN_URL = os.environ.get("ADMIN_URL", "chilavu-admin-7q2/").strip("/") + "/"
 
 
 # Application definition
@@ -67,6 +80,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'daily.security.SecurityHeadersMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -148,9 +162,43 @@ WHITENOISE_AUTOREFRESH = DEBUG
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Production security (only when DEBUG is off)
+# ---------- Security ----------
+
+# Cookies: not readable by JavaScript, not sent on cross-site requests
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_HTTPONLY = True          # the page reads the token from the form field, not the cookie
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # stay signed in for 30 days
+
+# Browser security headers
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+X_FRAME_OPTIONS = "DENY"             # the app can't be shown inside other sites (clickjacking)
+
+# Stricter password rules
+AUTH_PASSWORD_VALIDATORS[1]["OPTIONS"] = {"min_length": 8}
+
+# Shared cache (in the database) so login limits work across all server instances
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.db.DatabaseCache", "LOCATION": "chilavu_cache"}}
+
+# API: session login only (no username:password "Basic" logins), signed-in users only, rate-limited
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.SessionAuthentication"],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.UserRateThrottle"],
+    "DEFAULT_THROTTLE_RATES": {"user": "600/minute"},
+}
+
+# Uploads (backup restore) limited to 5 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # stay signed in for 30 days
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 180   # browsers always use HTTPS for this site
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False      # *.vercel.app is shared, so only this host

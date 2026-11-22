@@ -23,6 +23,7 @@ if os.environ.get("VERCEL") and os.environ.get("AUTO_MIGRATE", "1") == "1":
     try:
         from django.core.management import call_command
         call_command("migrate", interactive=False, verbosity=0)
+        call_command("createcachetable", verbosity=0)   # shared cache used by the login limits
     except Exception:  # never stop the site from starting because of this
         logging.getLogger(__name__).exception("Automatic migrate failed")
 
