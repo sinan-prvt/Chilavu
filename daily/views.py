@@ -311,22 +311,28 @@ from django.views.decorators.cache import cache_control
 @cache_control(max_age=3600)
 def web_manifest(request):
     data = {
+        "id": "/?app=chilavu",
         "name": "Chilavu",
         "short_name": "Chilavu",
         "description": "Daily expense tracker. Track every rupee, every day.",
         "start_url": "/?source=pwa",
         "scope": "/",
         "display": "standalone",
+        "display_override": ["standalone", "minimal-ui"],
         "orientation": "portrait",
-        "background_color": "#f5f6fa",
-        "theme_color": "#f5f6fa",
+        "background_color": "#ffffff",
+        "theme_color": "#ffffff",
+        "categories": ["finance", "productivity"],
+        "prefer_related_applications": False,
         "icons": [
-            {"src": "/static/daily/icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
-            {"src": "/static/daily/icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
-            {"src": "/static/daily/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+            {"src": "/static/daily/icons/icon-192.png?v=2", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+            {"src": "/static/daily/icons/icon-512.png?v=2", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+            {"src": "/static/daily/icons/maskable-192.png?v=2", "sizes": "192x192", "type": "image/png", "purpose": "maskable"},
+            {"src": "/static/daily/icons/maskable-512.png?v=2", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
         ],
         "shortcuts": [
-            {"name": "Add a spend", "url": "/?add=1", "icons": [{"src": "/static/daily/icons/icon-192.png", "sizes": "192x192"}]}
+            {"name": "Add a spend", "short_name": "Add", "url": "/?add=1",
+             "icons": [{"src": "/static/daily/icons/icon-192.png?v=2", "sizes": "192x192", "type": "image/png"}]}
         ],
     }
     resp = JsonResponse(data, json_dumps_params={"ensure_ascii": False})

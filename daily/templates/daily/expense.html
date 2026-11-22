@@ -327,6 +327,32 @@ h2 button{font-size:13px;color:var(--primary);font-weight:600;background:none;bo
 @keyframes ringPulse{50%{box-shadow:0 0 0 6px rgba(27,58,143,.12)}}
 
 /* ===== install banner ===== */
+/* install progress overlay */
+.inst-ov{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(11,26,74,.35);backdrop-filter:blur(6px)}
+.inst-ov.on{display:flex}
+.inst-card{width:100%;max-width:340px;background:var(--surface);border-radius:28px;padding:28px 24px 22px;text-align:center;box-shadow:0 30px 60px -20px rgba(11,26,74,.5);
+  animation:instIn .5s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes instIn{from{opacity:0;transform:perspective(600px) rotateX(-30deg) translateY(20px) scale(.92)}}
+.inst-card>b{display:block;font-size:19px;font-weight:800;letter-spacing:-.02em;margin-top:18px}
+.inst-card p{color:var(--muted);font-size:14px;line-height:1.5;margin:6px 0 18px}
+.inst-card p small{font-size:12px;color:var(--soft)}
+.inst-icon{position:relative;width:84px;height:84px;margin:0 auto}
+.inst-icon img{width:84px;height:84px;border-radius:24px;box-shadow:0 12px 26px -10px rgba(11,26,74,.45);animation:instBob 1.6s ease-in-out infinite}
+@keyframes instBob{50%{transform:translateY(-4px) rotate(-3deg)}}
+.inst-ring{position:absolute;inset:-8px;border-radius:30px;border:3px solid var(--primary-soft);border-top-color:var(--brand-green);animation:spin 1s linear infinite;display:none}
+.inst-check{position:absolute;right:-8px;bottom:-8px;width:32px;height:32px;border-radius:50%;background:var(--brand-green);color:#fff;font-weight:800;
+  display:none;place-items:center;box-shadow:0 6px 14px -4px var(--brand-green);border:3px solid var(--surface)}
+.inst-track{height:8px;border-radius:9px;background:var(--surface2);overflow:hidden;display:none}
+.inst-track span{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,var(--primary),var(--brand-green));transition:width .4s ease}
+.inst-pct{font-size:12px;font-weight:700;color:var(--muted);margin-top:8px;display:none}
+.inst-btn{width:100%;margin-top:18px;display:none}
+.inst-ov.installing .inst-ring,.inst-ov.preparing .inst-ring{display:block}
+.inst-ov.installing .inst-track,.inst-ov.installing .inst-pct,.inst-ov.slow .inst-track,.inst-ov.slow .inst-pct{display:block}
+.inst-ov.done .inst-check{display:grid;animation:tPop .5s cubic-bezier(.2,1.6,.4,1) both}
+.inst-ov.done .inst-track{display:block}.inst-ov.done .inst-img{animation:none}
+.inst-ov.done .inst-btn,.inst-ov.slow .inst-btn,.inst-ov.manual .inst-btn{display:block}
+.inst-ov.done .inst-icon img{animation:none}
+
 .install{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-top:12px;position:relative;animation:rise .6s cubic-bezier(.2,1.1,.3,1) both}
 .install img{width:42px;height:42px;border-radius:12px;box-shadow:var(--sh-p)}
 .install .t{flex:1;min-width:0}.install .t b{display:block;font-size:14px}.install .t span{display:block;font-size:12px;color:var(--muted)}
@@ -459,7 +485,7 @@ h2 button{font-size:13px;color:var(--primary);font-weight:600;background:none;bo
     </div>
 
     <div class="card install" id="installBox" style="display:none">
-      <img src="/static/daily/icons/icon-192.png" alt="">
+      <img src="/static/daily/icons/icon-192.png?v=2" alt="">
       <div class="t"><b>Install Chilavu</b><span id="installSub">Add it to your home screen like an app</span></div>
       <button class="ibtn" id="installBtn">Install</button>
       <button class="ix" id="installX" aria-label="Dismiss">✕</button>
@@ -542,6 +568,16 @@ h2 button{font-size:13px;color:var(--primary);font-weight:600;background:none;bo
   <button class="delbtn" id="delBtn" style="display:none">Delete</button>
 </div>
 <div class="toasts" id="toasts"></div>
+<div class="inst-ov" id="instOv" onclick="if(event.target===this)instClose()">
+  <div class="inst-card">
+    <div class="inst-icon"><img src="/static/daily/icons/icon-192.png?v=2" alt=""><div class="inst-ring"></div><div class="inst-check">✓</div></div>
+    <b id="instTitle">Installing Chilavu</b>
+    <p id="instSub"></p>
+    <div class="inst-track"><span id="instBar"></span></div>
+    <div class="inst-pct" id="instPct">0%</div>
+    <button class="btn inst-btn" onclick="instClose()">Done</button>
+  </div>
+</div>
 {% csrf_token %}
 {% endblock %}
 
@@ -831,16 +867,58 @@ function showInstall(){
     if(isIOS&&!deferredInstall){$("installSub").textContent="Tap Share ⬆ then “Add to Home Screen”";$("installBtn").style.display="none"}}
 }
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;showInstall()});
-addEventListener("appinstalled",()=>{$("installBox").style.display="none";toast("Chilavu installed 🎉","Open it from your home screen")});
+/* install progress overlay */
+let instTimer=null,instPct=0,instDone=false;
+function instShow(state){
+  const o=$("instOv");o.className="inst-ov on "+state;
+  const T={
+    preparing:["Getting Chilavu ready","Confirm in the pop-up to continue"],
+    installing:["Installing Chilavu","This can take up to 30 seconds. Keep this page open."],
+    done:["Chilavu is installed!","Find it on your home screen or in your app list."],
+    slow:["Almost there…","Your phone is still adding it. Check your home screen or app list in a moment."],
+    manual:["Install Chilavu",""]
+  }[state];
+  $("instTitle").textContent=T[0];$("instSub").textContent=T[1];
+}
+function instProgress(){
+  instPct=0;instDone=false;clearInterval(instTimer);$("instBar").style.width="0%";
+  instTimer=setInterval(()=>{                     // eases toward 92% until Chrome reports "installed"
+    instPct+=(92-instPct)*0.06;$("instBar").style.width=instPct.toFixed(1)+"%";
+    $("instPct").textContent=Math.round(instPct)+"%";
+  },400);
+  setTimeout(()=>{if(!instDone)instShow("slow")},40000);
+}
+function instFinish(){
+  instDone=true;clearInterval(instTimer);$("instBar").style.width="100%";$("instPct").textContent="100%";
+  instShow("done");vib();
+  const fb=document.querySelector(".fab").getBoundingClientRect();confetti(innerWidth/2,innerHeight/2);
+}
+function instClose(){$("instOv").className="inst-ov";clearInterval(instTimer)}
+addEventListener("appinstalled",()=>{$("installBox").style.display="none";
+  if($("instOv").classList.contains("on"))instFinish();else toast("Chilavu installed","Open it from your home screen")});
 async function doInstall(e){
   if(e)e.preventDefault();
   if(isStandalone()){toast("Already installed","You're using the app","info");return}
-  if(deferredInstall){deferredInstall.prompt();const r=await deferredInstall.userChoice;deferredInstall=null;if(r.outcome==="accepted")$("installBox").style.display="none";return}
-  toast(isIOS?"Tap Share ⬆, then Add to Home Screen":"Use your browser menu ⋮","then choose “Install app” / “Add to Home screen”","info",null,5000);
+  if(deferredInstall){
+    instShow("preparing");
+    deferredInstall.prompt();
+    const r=await deferredInstall.userChoice;deferredInstall=null;
+    if(r.outcome==="accepted"){$("installBox").style.display="none";instShow("installing");instProgress()}
+    else instClose();
+    return;
+  }
+  // browser didn't offer a one-tap install: show the manual steps
+  instShow("manual");$("instTitle").textContent="Install Chilavu";
+  $("instSub").innerHTML=isIOS
+    ?"In <b>Safari</b>, tap <b>Share ⬆</b> → <b>Add to Home Screen</b> → <b>Add</b>."
+    :"Open this page in <b>Chrome</b>, tap <b>⋮</b> → <b>Install app</b>.<br><small>If you only see “Add to Home screen”, reload the page once and try again.</small>";
 }
 $("installBtn").onclick=doInstall;$("installLink").onclick=doInstall;
 $("installX").onclick=()=>{lsSet("installDismissed","1");$("installBox").style.display="none"};
 showInstall();
+// Android without a one-tap prompt (yet): still show the card, it explains ⋮ → Install app
+if(/android/i.test(navigator.userAgent))setTimeout(()=>{if(!deferredInstall&&!isStandalone()&&!lsGet("installDismissed")){
+  $("installBox").style.display="flex";$("installSub").textContent="Tap for the steps to install it as an app"}},3500);
 
 /* ---------- daily reminder ---------- */
 let REM={on:false,hour:21,last:""};
