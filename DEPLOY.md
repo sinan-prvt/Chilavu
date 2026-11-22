@@ -49,7 +49,11 @@ python -c "import secrets; print(secrets.token_urlsafe(50))"
 
 ---
 
-## 4. Create the database tables (one time)
+## 4. Database tables
+
+The app creates its tables in Neon automatically the first time it starts on Vercel (see `core/wsgi.py`), so there is nothing to run. The manual steps below are only a fallback.
+
+### Fallback: create the tables from your PC
 
 Copy the database URL: Vercel project → **Storage** → your Neon DB → **.env.local** tab → copy the `DATABASE_URL` value (starts with `postgresql://`).
 
