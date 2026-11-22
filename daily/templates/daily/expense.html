@@ -806,7 +806,7 @@ html.locked body{overflow:hidden}
     </div>
     <h2>Security <small class="h2s">optional</small></h2>
     <div class="card set">
-      <div class="srow"><span>App lock<small class="hint" id="lockHint">Ask for a PIN when the app opens</small></span><button class="toggle" id="lockT"></button></div>
+      <div class="srow"><span>App lock<small class="hint" id="lockHint">Ask for a PIN every 6 hours</small></span><button class="toggle" id="lockT"></button></div>
       <div class="srow" id="bioRow" style="display:none"><span>Unlock with fingerprint / face<small class="hint">Uses your phone's screen lock</small></span><button class="toggle" id="bioT"></button></div>
       <div class="srow" id="pinChRow" style="display:none">Change PIN<button class="linkbtn" id="pinCh">Change</button></div>
       <div class="srow"><span>Recovery code<small class="hint" id="recovHint">Lets you reset a forgotten password</small></span><button class="linkbtn" onclick="makeRecovery()">New code</button></div>
@@ -1567,11 +1567,11 @@ $("pinpad").onclick=async e=>{
   if(pinBuf.length>=4)return;pinBuf+=k;drawDots();if(pinBuf.length<4)return;
   await new Promise(r=>setTimeout(r,120));
   if(pinMode==="unlock"||pinMode==="verify"){
-    if(await hashPin(pinBuf)===lsGet("lockPin")){hideLock();lastActive=Date.now();if(pinMode==="verify"&&verifyThen){const f=verifyThen;verifyThen=null;f()}}
+    if(await hashPin(pinBuf)===lsGet("lockPin")){hideLock();markUnlocked();if(pinMode==="verify"&&verifyThen){const f=verifyThen;verifyThen=null;f()}}
     else{pinBuf="";drawDots(true);$("lockSub").textContent="Wrong PIN, try again"}
   }else if(pinMode==="set"){pinFirst=pinBuf;showLock("confirm")}
   else if(pinMode==="confirm"){
-    if(pinBuf===pinFirst){lsSet("lockPin",await hashPin(pinBuf));lsSet("lockOn","1");hideLock();fillLock();
+    if(pinBuf===pinFirst){lsSet("lockPin",await hashPin(pinBuf));lsSet("lockOn","1");hideLock();markUnlocked();fillLock();
       toast("App lock on","Chilavu will ask for your PIN when it opens");offerBio()}
     else{pinFirst="";showLock("set");$("lockSub").textContent="PINs didn't match. Try again";drawDots(true)}
   }
@@ -1585,7 +1585,7 @@ function fillLock(){
   $("lockT").classList.toggle("on",LOCK.on);$("pinChRow").style.display=LOCK.on?"flex":"none";
   const bioOK=!!(window.PublicKeyCredential&&isSecureContext);
   $("bioRow").style.display=LOCK.on&&bioOK?"flex":"none";$("bioT").classList.toggle("on",!!LOCK.bio);
-  $("lockHint").textContent=LOCK.on?"On — asks for your PIN when the app opens":"Off — turn on to ask for a PIN when the app opens";
+  $("lockHint").textContent=LOCK.on?"On — asks for your PIN every 6 hours":"Off — turn on to ask for a PIN every 6 hours";
 }
 function requirePin(then){verifyThen=then;showLock("verify")}
 $("lockT").onclick=()=>{
@@ -1614,16 +1614,20 @@ async function bioUnlock(){
   if(!LOCK.bio)return;
   try{await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rpId:location.hostname,
       allowCredentials:[{type:"public-key",id:unb64(LOCK.bio)}],userVerification:"required",timeout:60000}});
-    hideLock();lastActive=Date.now()}catch(e){}
+    hideLock();markUnlocked()}catch(e){}
 }
 $("bioT").onclick=()=>{if(LOCK.bio){requirePin(()=>{try{localStorage.removeItem("lockBio")}catch(e){}fillLock();toast("Fingerprint unlock off","","info")})}else enableBio()};
 /* lock on open, and again after 1 minute in the background */
 let lastActive=Date.now();
+/* like Google Pay: after unlocking, stay unlocked on this phone for 6 hours */
+const LOCK_AFTER=6*60*60*1000;
+function markUnlocked(){lastActive=Date.now();lsSet("lockUnlockedAt",String(Date.now()))}
+function lockDue(){return LOCK.on&&Date.now()-(+lsGet("lockUnlockedAt")||0)>LOCK_AFTER}
 document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState==="hidden")lastActive=Date.now();
-  else if(LOCK.on&&Date.now()-lastActive>60000&&!$("lock").classList.contains("on"))showLock("unlock");
+  else if(lockDue()&&!$("lock").classList.contains("on"))showLock("unlock");
 });
-if(LOCK.on)showLock("unlock");
+if(lockDue())showLock("unlock");
 </script>
 
 <script>
