@@ -69,22 +69,26 @@ svg.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stro
   <div class="tag" id="introTag" data-user="{% if user.is_authenticated %}{{ user.username|title }}{% endif %}">Track every rupee, every day</div>
 </div>
 <style>
-#intro{position:fixed;inset:0;z-index:999;display:none;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);
-  background-image:radial-gradient(600px 360px at 50% 40%,var(--primary-soft),transparent 70%)}
+#intro{position:fixed;inset:0;z-index:999;display:none;flex-direction:column;align-items:center;justify-content:center;background:var(--bg)}
+/* plain background first (same as Android's splash), soft glow fades in */
+#intro::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 360px at 50% 40%,var(--primary-soft),transparent 70%);
+  opacity:0;animation:glowIn 1.2s ease .5s forwards;pointer-events:none}
+@keyframes glowIn{to{opacity:1}}
 .intro-on #intro{display:flex}
 .intro-on body{overflow:hidden}
 .intro-on body>*:not(#intro),.intro-on body>*:not(#intro) *{animation-play-state:paused!important}
 #intro .hello{width:min(88vw,520px);overflow:visible;margin-top:-10px}
-#intro .imark{width:76px;height:76px;border-radius:22px;box-shadow:0 18px 40px -12px rgba(20,40,120,.45);
-  animation:imIn .9s cubic-bezier(.2,1.4,.4,1) both}
-@keyframes imIn{from{opacity:0;transform:perspective(500px) rotateY(-360deg) scale(.3)}}
+/* icon starts big in the screen centre (where the splash icon was), then glides up */
+#intro .imark{position:relative;width:76px;height:76px;border-radius:22px;box-shadow:0 18px 40px -12px rgba(20,40,120,.45);
+  transform:translateY(var(--dy,0px)) scale(1.6);animation:imUp .9s cubic-bezier(.65,0,.25,1) .25s forwards}
+@keyframes imUp{60%{transform:translateY(-6px) scale(.96)}100%{transform:none}}
 #intro .hw{font-family:"Dancing Script",cursive;font-weight:700;font-size:150px;fill:url(#hg);fill-opacity:0;
   stroke:url(#hg);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1400;stroke-dashoffset:1400;
-  animation:hwDraw 2.2s cubic-bezier(.55,.1,.35,1) .2s forwards,hwFill .7s ease 2.1s forwards}
+  animation:hwDraw 2s cubic-bezier(.55,.1,.35,1) .75s forwards,hwFill .6s ease 2.5s forwards}
 #intro .ml{font-family:"Noto Sans Malayalam",sans-serif;font-weight:800;font-size:26px;color:var(--text);margin-top:-6px;
   opacity:0;filter:blur(8px);transform:translateY(10px);animation:mlIn .8s ease 2.3s forwards}
 #intro .tag{font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:10px;
-  opacity:0;animation:mlIn .8s ease 2.6s forwards}
+  opacity:0;animation:mlIn .7s ease 2.7s forwards}
 #intro.bye{animation:introOut .8s cubic-bezier(.7,0,.3,1) forwards}
 @keyframes hwDraw{to{stroke-dashoffset:0}}
 @keyframes hwFill{to{fill-opacity:1;stroke-width:0}}
@@ -98,16 +102,19 @@ svg.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stro
   try{
     var js=sessionStorage.getItem("justSignedIn");justIn=!authPage&&!!js;isNew=js==="new";
     if(!authPage)sessionStorage.removeItem("justSignedIn");
-    show=(justIn||!sessionStorage.getItem("introSeen"))&&!matchMedia("(prefers-reduced-motion: reduce)").matches;
-    sessionStorage.setItem("introSeen","1");
+    // play on every open / reload; skip only when a sign-in or sign-up attempt was just rejected
+    show=!(authPage&&js)&&!matchMedia("(prefers-reduced-motion: reduce)").matches;
   }catch(e){}
   if(show&&justIn){var tg=document.getElementById("introTag"),nm=tg.getAttribute("data-user");tg.textContent=(isNew?"Welcome":"Welcome back")+(nm?", "+nm:"")}
   if(!show){document.getElementById("intro").remove();return}
   document.documentElement.classList.add("intro-on");
   var el=document.getElementById("intro"),done=false;
+  // start the icon at the exact screen centre, where Android's splash icon sits
+  var im=el.querySelector(".imark");
+  if(im){var r=im.getBoundingClientRect();im.style.setProperty("--dy",(innerHeight/2-(r.top+r.height/2))+"px")}
   function end(){if(done)return;done=true;el.classList.add("bye");setTimeout(function(){document.documentElement.classList.remove("intro-on");el.remove()},800)}
   el.addEventListener("click",end);           // tap to skip
-  setTimeout(end,3700);
+  setTimeout(end,3900);
 })();
 </script>
 

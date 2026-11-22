@@ -320,7 +320,7 @@ def web_manifest(request):
         "display": "standalone",
         "display_override": ["standalone", "minimal-ui"],
         "orientation": "portrait",
-        "background_color": "#ffffff",
+        "background_color": "#f5f6fa",
         "theme_color": "#ffffff",
         "categories": ["finance", "productivity"],
         "prefer_related_applications": False,

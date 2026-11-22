@@ -1,5 +1,5 @@
 /* Chilavu service worker: offline shell + daily reminder */
-const CACHE = "chilavu-v4";
+const CACHE = "chilavu-v5";
 const SHELL = ["/", "/signin/", "/static/daily/icons/icon-192.png"];
 
 self.addEventListener("install", e => {

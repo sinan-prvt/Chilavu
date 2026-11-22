@@ -92,7 +92,7 @@ label{font-size:13px;color:var(--text);font-weight:600;margin-bottom:-6px}
   const box=document.querySelector(".box");if(!box)return;
   [...box.children].forEach((c,i)=>c.style.setProperty("--i",i));
   // tilt with finger / mouse / phone tilt (starts after the entrance animation)
-  const wait=document.documentElement.classList.contains("intro-on")?4500:0;
+  const wait=document.documentElement.classList.contains("intro-on")?4800:0;
   let ready=false;setTimeout(()=>{ready=true;box.style.animation="none"},1400+wait);
   const set=(x,y)=>{if(!ready)return;box.style.transform=`rotateX(${y*-10}deg) rotateY(${x*12}deg)`;box.style.setProperty("--shine",(x*140)+"%")};
   document.addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;set(e.clientX/innerWidth-.5,e.clientY/innerHeight-.5)});
