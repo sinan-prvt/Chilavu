@@ -330,11 +330,19 @@ h2 button{font-size:13px;color:var(--primary);font-weight:600;background:none;bo
 /* install progress overlay */
 /* ===== dark mode polish ===== */
 :root[data-theme="dark"] .card3d{
-  background:radial-gradient(400px 200px at 100% 0%,rgba(79,124,240,.75),transparent 60%),radial-gradient(300px 200px at 0% 100%,rgba(22,194,95,.35),transparent 60%),#16245a;
-  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 24px 48px -16px rgba(0,0,0,.8)}
-:root[data-theme="dark"] .card{border-color:#2a2d3a}
-:root[data-theme="dark"] .tx,:root[data-theme="dark"] .loan{border-color:#2a2d3a!important}
-:root[data-theme="dark"] .hello small,:root[data-theme="dark"] .h2s{color:#a3a9bd}
+  background:radial-gradient(380px 200px at 100% 0%,rgba(91,132,245,.28),transparent 60%),radial-gradient(300px 200px at 0% 100%,rgba(22,194,95,.18),transparent 60%),linear-gradient(160deg,#1e1e1e,#0c0c0c);
+  box-shadow:0 0 0 1px rgba(255,255,255,.09) inset,0 24px 48px -16px rgba(0,0,0,.9)}
+:root[data-theme="dark"] .card3d .orb{opacity:.18}
+:root[data-theme="dark"] .card{border-color:#262626}
+:root[data-theme="dark"] .tx,:root[data-theme="dark"] .loan{border-color:#262626!important}
+:root[data-theme="dark"] .hello small,:root[data-theme="dark"] .h2s{color:#a3a3a3}
+:root[data-theme="dark"] .nav{background:rgba(18,18,18,.92);border-color:#262626}
+:root[data-theme="dark"] .sheet{background:var(--surface)!important}
+:root[data-theme="dark"] .lock{background:#000}
+:root[data-theme="dark"] .cd.l1{background:#1f2a44}:root[data-theme="dark"] .cd.l2{background:#2c3f78}
+:root[data-theme="dark"] .streak{background:var(--surface)}
+:root[data-theme="dark"] .goalc.done{background:var(--surface)}
+:root[data-theme="dark"] body{background:#000}
 :root[data-theme="dark"] .ri{background:#3a2f12}
 :root[data-theme="dark"] .tx .amt span.pend{background:#3a2f12!important;color:#fbbf24!important}
 :root[data-theme="dark"] .cd.l3{background:#3d63d6}
