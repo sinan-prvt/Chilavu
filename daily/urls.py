@@ -20,6 +20,8 @@ from .views import (
     RecoveryCodeApi,
     backup_download,
     forgot_password_page,
+    LoanListApi,
+    LoanDetailApi,
 )
 
 urlpatterns = [
@@ -37,6 +39,8 @@ urlpatterns = [
     path("api/recovery/", RecoveryCodeApi.as_view(), name="recovery"),
     path("backup.json", backup_download, name="backup"),
     path("forgot/", forgot_password_page, name="forgot"),
+    path("api/loans/", LoanListApi.as_view(), name="loan-list"),
+    path("api/loans/<int:pk>/", LoanDetailApi.as_view(), name="loan-detail"),
 
     # Old habit tracker (kept)
     path("daily/", daily_page, name="daily-page"),

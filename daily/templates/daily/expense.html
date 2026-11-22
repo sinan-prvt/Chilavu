@@ -328,6 +328,61 @@ h2 button{font-size:13px;color:var(--primary);font-weight:600;background:none;bo
 
 /* ===== install banner ===== */
 /* install progress overlay */
+/* ===== consistent Home rhythm: same gap, same ring size ===== */
+#p-home>.card,#p-home>.qact,#p-home>.insight-chip{margin-top:12px}
+#p-home>.insight-chip{margin-left:0;margin-right:0}
+.budget,.goalc,.loanrow,.recov,.install{padding:14px 16px;gap:14px;min-height:76px}
+.ring,.gring{width:56px!important;height:56px!important}
+.ring div,.gring div{width:44px!important;height:44px!important;font-size:13px!important}
+.budget .t b,.goalc b{font-size:15px}
+.budget .t span,.goalc span{font-size:12px}
+
+/* ===== quick actions (3) ===== */
+.qact{grid-template-columns:repeat(3,1fr)!important}
+.qa{flex-direction:column;gap:6px!important;padding:12px 6px!important;font-size:13px!important}
+.qa.lend span{background:linear-gradient(145deg,var(--primary-2),var(--primary))}
+
+/* ===== lend & borrow ===== */
+.loanrow{display:flex;align-items:center;gap:12px;width:100%;padding:12px 16px;margin-top:12px;text-align:left;cursor:pointer}
+.lr-ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:18px;font-weight:800;color:#fff;flex:none;
+  background:linear-gradient(145deg,var(--primary-2),var(--primary))}
+.lr-t{flex:1;min-width:0}.lr-t small{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.lr-t b{display:block;font-size:14px;font-weight:700;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lr-t .g{color:var(--green)}.lr-t .r{color:var(--red)}.lr-t .sep{color:var(--soft)}
+.lr-go{font-size:22px;color:var(--soft)}
+.ptitle .back{border:0;background:var(--surface);box-shadow:var(--sh-1);width:36px;height:36px;border-radius:12px;font-size:22px;margin-right:10px;vertical-align:middle;color:var(--text)}
+.ltot{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mini b.g,.ltot b.g{color:var(--green)}.mini b.r,.ltot b.r{color:var(--red)}
+.lform{padding:14px;margin-top:12px;display:grid;gap:10px}
+.lgrid{display:grid;grid-template-columns:1fr 130px;gap:8px}.lgrid .field{padding:12px;font-size:15px}
+.kind2.lkind button.on{color:var(--green)}.kind2.lkind.inc button.on{color:var(--red)}
+.loan{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);background:var(--surface);border-radius:18px;box-shadow:var(--sh-1)}
+.loan.done{opacity:.6}
+.loan .mid{flex:1;min-width:0}.loan .mid b{display:block;font-size:15px}
+.loan .mid small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lamt{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.lamt b{font-size:15px;font-weight:800}.lamt.g b{color:var(--green)}.lamt.r b{color:var(--red)}
+.lbtn{border:0;border-radius:9px;padding:5px 10px;font-size:12px;font-weight:700;background:var(--green-soft);color:var(--green)}
+.lbtn.ghost{background:var(--surface2);color:var(--muted)}
+.ldel{border:0;background:none;color:var(--soft);font-size:13px;padding:4px;flex:none}
+#lOpen .list,#lDone .list{display:grid;gap:10px}
+
+/* ===== insights ===== */
+.inslist{padding:6px 14px}
+.ins{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.45;color:var(--muted)}
+.ins:last-child{border:0}.ins b{color:var(--text)}
+.ins-i{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
+.ins-i.g{background:var(--green-soft);color:var(--green)}.ins-i.r{background:var(--red-soft);color:var(--red)}.ins-i.b{background:var(--primary-soft);color:var(--primary)}
+
+/* ===== offline ===== */
+.netbar{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translate(-50%,-150%);z-index:45;
+  padding:8px 14px;border-radius:99px;font-size:12px;font-weight:700;background:var(--primary);color:#fff;box-shadow:var(--sh-2);transition:transform .3s;white-space:nowrap}
+.netbar.on{transform:translate(-50%,0)}.netbar.off{background:#334155}
+.tx .amt span.pend{background:#fef3c7!important;color:#b45309!important}
+
+/* nav: lend & borrow item only in the laptop sidebar */
+.nav .desk-only{display:none}
+
 /* ===== savings goal ===== */
 .goalc{display:flex;align-items:center;gap:14px;padding:14px 16px;margin-top:12px;cursor:pointer}
 .gring{--p:0;width:58px;height:58px;border-radius:50%;flex:none;display:grid;place-items:center;
@@ -513,12 +568,11 @@ html.locked body{overflow:hidden}
   .card3d{padding:28px}.card3d .bal{font-size:44px}
 
   /* stats: chart and top spends side by side */
-  #p-stats.on{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);column-gap:28px;align-items:start}
-  #p-stats>*{grid-column:1/-1}
-  #p-stats>h2:nth-of-type(1){grid-column:1;grid-row:4}
-  #p-stats>.bars{grid-column:1;grid-row:5}
-  #p-stats>h2:nth-of-type(2){grid-column:2;grid-row:4}
-  #p-stats>.donutbox{grid-column:2;grid-row:5}
+  #p-stats,#p-loans{max-width:860px}
+  .nav button.desk-only{display:flex!important}
+  .ptitle .back{display:none}
+  .qa.lend{display:none}
+  .qact{grid-template-columns:1fr 1fr!important}
   .bars .cols{height:220px}
 
   /* history and settings: comfortable reading width */
@@ -555,6 +609,7 @@ html.locked body{overflow:hidden}
 {% endblock %}
 
 {% block body %}
+<div class="netbar" id="netBar" role="status"></div>
 <div class="ptr" id="ptr" aria-hidden="true"><div class="ptr-coin"><i>₹</i><i>₹</i></div></div>
 <div class="app">
   <div class="top">
@@ -579,11 +634,28 @@ html.locked body{overflow:hidden}
     </div></div>
 
     <div class="qact">
-      <button class="qa spend" onclick="openSheet(null,'expense')"><span>−</span>Add spend</button>
-      <button class="qa income" onclick="openSheet(null,'income')"><span>+</span>Add income</button>
+      <button class="qa spend" onclick="openSheet(null,'expense')"><span>−</span>Spend</button>
+      <button class="qa income" onclick="openSheet(null,'income')"><span>+</span>Income</button>
+      <button class="qa lend" onclick="go('loans')"><span>⇄</span>Lend</button>
     </div>
 
     <div class="insight-chip" id="insChip" style="display:none"><span class="ia" id="insArrow"></span><span id="insText"></span></div>
+
+    <div class="card budget" id="budgetBox" style="display:none">
+      <div class="ring" id="ring"><div id="ringTxt">0%</div></div>
+      <div class="t"><b id="budTitle"></b><span id="budSub"></span></div>
+    </div>
+
+    <div class="card goalc" id="goalBox" style="display:none" onclick="go('settings');setTimeout(()=>$('goalName').focus(),400)">
+      <div class="gring" id="gRing"><div id="gPct">0%</div></div>
+      <div class="t"><small>Savings goal</small><b id="gName"></b><span id="gSub"></span><div class="gbar"><i id="gBar"></i></div></div>
+    </div>
+
+    <button class="card loanrow" id="loanRow" style="display:none" onclick="go('loans')">
+      <span class="lr-ic">⇄</span>
+      <span class="lr-t"><small>Lend &amp; borrow</small><b><span class="g" id="lrGet"></span><span class="sep" id="lrSep"> · </span><span class="r" id="lrOwe"></span></b></span>
+      <span class="lr-go">›</span>
+    </button>
 
     <div class="card streak" id="streakBox">
       <div class="shd">
@@ -595,10 +667,8 @@ html.locked body{overflow:hidden}
       <div class="week" id="stWeek"></div>
     </div>
 
-    <div class="card goalc" id="goalBox" style="display:none" onclick="go('settings');setTimeout(()=>$('goalName').focus(),400)">
-      <div class="gring" id="gRing"><div id="gPct">0%</div></div>
-      <div class="t"><small>Savings goal</small><b id="gName"></b><span id="gSub"></span><div class="gbar"><i id="gBar"></i></div></div>
-    </div>
+    <h2>Recent <button onclick="go('history')">See all</button></h2>
+    <div class="card list" id="recent"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
 
     <div class="card recov" id="recovBox" style="display:none">
       <div class="ri">🔑</div>
@@ -612,14 +682,6 @@ html.locked body{overflow:hidden}
       <button class="ibtn" id="installBtn">Install</button>
       <button class="ix" id="installX" aria-label="Dismiss">✕</button>
     </div>
-
-    <div class="card budget" id="budgetBox" style="display:none">
-      <div class="ring" id="ring"><div id="ringTxt">0%</div></div>
-      <div class="t"><b id="budTitle"></b><span id="budSub"></span></div>
-    </div>
-
-    <h2>Recent <button onclick="go('history')">See all</button></h2>
-    <div class="card list" id="recent"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
   </section>
 
   <!-- STATS -->
@@ -631,6 +693,8 @@ html.locked body{overflow:hidden}
       <div class="card mini"><small>Spent</small><b id="mTotal">—</b></div>
       <div class="card mini"><small id="mSavedL">Saved</small><b id="mSaved">—</b></div>
     </div>
+    <h2>Insights</h2>
+    <div class="card inslist" id="insList"></div>
     <button class="card sharebtn" onclick="shareReport()"><span>⤴</span><div><b>Share monthly report</b><small>An image of this month's summary for WhatsApp</small></div></button>
     <h2>Calendar <small class="h2s">tap a day to see it</small></h2>
     <div class="card cal"><div class="cal-h" id="calHead"></div><div class="cal-g" id="calGrid"></div><div class="cal-day" id="calDay"></div></div>
@@ -638,6 +702,34 @@ html.locked body{overflow:hidden}
     <div class="card bars"><div class="cols" id="cols"></div><div class="xs" id="xs"></div></div>
     <h2>Top spends</h2>
     <div class="card donutbox" style="padding:16px"><div class="legend" id="legend" style="margin:0"></div></div>
+  </section>
+
+  <!-- LEND & BORROW -->
+  <section class="page" id="p-loans">
+    <div class="ptitle"><button class="back" onclick="go('home')" aria-label="Back">‹</button>Lend &amp; borrow</div>
+    <div class="ltot">
+      <div class="card mini"><small>You'll get</small><b class="g" id="lTotGet">—</b></div>
+      <div class="card mini"><small>You owe</small><b class="r" id="lTotOwe">—</b></div>
+    </div>
+
+    <div class="card lform">
+      <div class="kind2 lkind" id="lKind"><button data-k="lent" class="on">I gave</button><button data-k="borrowed">I took</button><i class="kpill"></i></div>
+      <div class="lgrid">
+        <input class="field" id="lPerson" placeholder="Person's name" maxlength="60" list="lPeople" autocomplete="off">
+        <input class="field" id="lAmt" type="number" inputmode="decimal" placeholder="Amount">
+      </div>
+      <datalist id="lPeople"></datalist>
+      <div class="lgrid">
+        <input class="field" id="lNote" placeholder="Note (optional)" maxlength="200">
+        <input class="field" id="lDate" type="date">
+      </div>
+      <button class="btn" id="lSave" style="width:100%">Save</button>
+    </div>
+
+    <h2>Open</h2>
+    <div id="lOpen"></div>
+    <h2 id="lDoneH" style="display:none">Settled <button id="lDoneT">Show</button></h2>
+    <div id="lDone" style="display:none"></div>
   </section>
 
   <!-- HISTORY -->
@@ -719,6 +811,7 @@ html.locked body{overflow:hidden}
   <button data-p="stats"><svg class="i" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
   <button class="fab" onclick="openSheet()" aria-label="Add"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   <button data-p="history"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></svg>History</button>
+  <button data-p="loans" class="desk-only"><svg class="i" viewBox="0 0 24 24"><path d="M4 8h14l-4-4M20 16H6l4 4"/></svg>Lend &amp; borrow</button>
   <button data-p="settings"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profile</button>
 </nav>
 
@@ -906,7 +999,7 @@ function txRow(t){
   const d=t.date===TODAY?"Today":new Date(t.date+"T00:00").toLocaleDateString('en',{day:'numeric',month:'short'});
   const tm=t.created_at?new Date(t.created_at).toLocaleTimeString("en",{hour:"numeric",minute:"2-digit"}):"";
   const inc=t.kind==="income";
-  return `<button class="tx ${inc?"is-inc":""}" data-id="${t.id}" style="--c:${inc?"#16c25f":colorFor(t.note)}" onclick="if(!this.dataset.swiped)openSheet(${t.id})">${badge(t.note)}<div class="mid"><b>${esc(t.note)||"Untitled"}</b><small>${d}${t.date===TODAY&&tm?`<i class="dot"></i>${tm}`:""}</small></div><div class="amt ${inc?"in":""}"><b>${inc?"+":"−"}${money(t.amount)}</b><span>${inc?"Income":"Spent"}</span></div></button>`;
+  return `<button class="tx ${inc?"is-inc":""}" data-id="${t.id}" style="--c:${inc?"#16c25f":colorFor(t.note)}" onclick="if(!this.dataset.swiped)openSheet(${t.id})">${badge(t.note)}<div class="mid"><b>${esc(t.note)||"Untitled"}</b><small>${d}${t.date===TODAY&&tm?`<i class="dot"></i>${tm}`:""}</small></div><div class="amt ${inc?"in":""}"><b>${inc?"+":"−"}${money(t.amount)}</b><span class="${t.pending?"pend":""}">${t.pending?"Waiting to sync":inc?"Income":"Spent"}</span></div></button>`;
 }
 
 /* tilt */
@@ -1035,13 +1128,17 @@ async function save(){
     closeSheet();const fb=document.querySelector(".fab").getBoundingClientRect();if(!S.id)confetti(fb.left+fb.width/2,fb.top);toast(S.id?"Entry updated":(inc?"Income added":"Spend added"),`${name} · ${inc?"+":""}${money(amount)}`);refresh();
     if(!inc&&typeof checkBudget==="function")setTimeout(checkBudget,1200);
     if(inc&&typeof refreshWallet==="function")refreshWallet();
-  }catch(e){toast("Could not save","Check your connection","err")}
+  }catch(e){
+    // no network: keep new entries on this phone and sync later
+    if(!S.id&&(e instanceof TypeError||!navigator.onLine)&&typeof queueOffline==="function"){closeSheet();queueOffline(body);return}
+    toast("Could not save","Check your connection","err")}
 }
 $("delBtn").onclick=()=>{const id=S.id;closeSheet();softDelete(id)};
 
 /* ---------- delete with undo ---------- */
 const pendingDel=new Map();
 function softDelete(id){
+  if(id<0){TX=TX.filter(t=>t.id!==id);try{setOutbox(outbox().filter(x=>x.id!==id));updateNet()}catch(e){}refresh();toast("Removed","It was not synced yet","info");return}
   const idx=TX.findIndex(t=>t.id===id);if(idx<0)return;
   const item=TX[idx];TX.splice(idx,1);refresh();
   const timer=setTimeout(async()=>{pendingDel.delete(id);
@@ -1050,7 +1147,7 @@ function softDelete(id){
   toast("Deleted "+(item.note||"entry"),money(item.amount),"del",{label:"Undo",fn:()=>{
     clearTimeout(pendingDel.get(id));pendingDel.delete(id);TX.push(item);sortTX();refresh();toast("Restored",item.note||"","info")}},4500);
 }
-const sortTX=()=>TX.sort((a,b)=>b.date.localeCompare(a.date)||String(b.created_at).localeCompare(String(a.created_at)));
+const sortTX=()=>TX.sort((a,b)=>b.date.localeCompare(a.date)||((b.pending?1:0)-(a.pending?1:0))||new Date(b.created_at)-new Date(a.created_at));
 /* send pending deletes if the page is closed during the undo window */
 addEventListener("pagehide",()=>{for(const [id,tm] of pendingDel){clearTimeout(tm);
   fetch(`/api/expenses/${id}/`,{method:"DELETE",headers:{"X-CSRFToken":csrf},credentials:"same-origin",keepalive:true})}pendingDel.clear()});
@@ -1506,5 +1603,145 @@ document.addEventListener("visibilitychange",()=>{
   else if(LOCK.on&&Date.now()-lastActive>60000&&!$("lock").classList.contains("on"))showLock("unlock");
 });
 if(LOCK.on)showLock("unlock");
+</script>
+
+<script>
+/* ================= LEND & BORROW ================= */
+let LOANS=[],lKind="lent",showDone=false;
+const _go=go;go=function(p){_go(p);if(p==="loans")renderLoans()};
+async function loadLoans(){try{LOANS=await api("/api/loans/")||[];lsSet("cacheLoans",JSON.stringify(LOANS))}catch(e){try{LOANS=JSON.parse(lsGet("cacheLoans")||"[]")}catch(_){}}renderLoanRow();if($("p-loans").classList.contains("on"))renderLoans()}
+function loanTotals(){const open=LOANS.filter(l=>!l.settled);
+  return {get:sum(open.filter(l=>l.kind==="lent")),owe:sum(open.filter(l=>l.kind==="borrowed")),open}}
+function renderLoanRow(){
+  const t=loanTotals(),row=$("loanRow");
+  if(!t.open.length){row.style.display="none";return}
+  row.style.display="flex";
+  $("lrGet").textContent=t.get?`You'll get ${fmt0(t.get)}`:"";
+  $("lrOwe").textContent=t.owe?`You owe ${fmt0(t.owe)}`:"";
+  $("lrSep").style.display=t.get&&t.owe?"inline":"none";
+}
+function loanItem(l){
+  const lent=l.kind==="lent",d=new Date(l.date+"T00:00").toLocaleDateString('en',{day:'numeric',month:'short'});
+  return `<div class="loan ${l.settled?"done":""}">
+    ${badge(l.person)}
+    <div class="mid"><b>${esc(l.person)}</b><small>${lent?"You gave":"You took"} · ${d}${l.note?" · "+esc(l.note):""}</small></div>
+    <div class="lamt ${lent?"g":"r"}"><b>${fmt0(l.amount)}</b>
+      ${l.settled?`<button class="lbtn ghost" onclick="settleLoan(${l.id},false)">Undo</button>`:`<button class="lbtn" onclick="settleLoan(${l.id},true)">Settle</button>`}</div>
+    <button class="ldel" onclick="delLoan(${l.id})" aria-label="Delete">✕</button>
+  </div>`;
+}
+function renderLoans(){
+  const t=loanTotals();
+  $("lTotGet").textContent=fmt0(t.get);$("lTotOwe").textContent=fmt0(t.owe);
+  if(!$("lDate").value)$("lDate").value=TODAY;
+  $("lPeople").innerHTML=[...new Set(LOANS.map(l=>l.person))].map(p=>`<option value="${esc(p)}">`).join("");
+  $("lOpen").innerHTML=t.open.length?`<div class="card list">${t.open.map(loanItem).join("")}</div>`
+    :`<div class="empty card">Nothing pending. Add money you gave or took above.</div>`;
+  const done=LOANS.filter(l=>l.settled);
+  $("lDoneH").style.display=done.length?"flex":"none";$("lDoneT").textContent=showDone?"Hide":`Show (${done.length})`;
+  $("lDone").style.display=showDone&&done.length?"block":"none";
+  $("lDone").innerHTML=done.length?`<div class="card list">${done.map(loanItem).join("")}</div>`:"";
+  stagger($("lOpen"));
+}
+$("lDoneT").onclick=()=>{showDone=!showDone;renderLoans()};
+$("lKind").onclick=e=>{const b=e.target.closest("button");if(!b)return;vib();lKind=b.dataset.k;
+  [...$("lKind").querySelectorAll("button")].forEach(x=>x.classList.toggle("on",x===b));$("lKind").classList.toggle("inc",lKind==="borrowed")};
+$("lSave").onclick=async()=>{
+  const person=$("lPerson").value.trim(),amt=+$("lAmt").value;
+  if(!person){toast("Add a name","Who did you give to / take from?","err");$("lPerson").focus();return}
+  if(!(amt>0)){toast("Enter an amount","","err");$("lAmt").focus();return}
+  try{const l=await api("/api/loans/","POST",{kind:lKind,person,amount:amt.toFixed(2),note:$("lNote").value.trim(),date:$("lDate").value||TODAY});
+    LOANS.unshift(l);$("lPerson").value="";$("lAmt").value="";$("lNote").value="";$("lDate").value=TODAY;
+    renderLoans();renderLoanRow();lsSet("cacheLoans",JSON.stringify(LOANS));
+    toast("Saved",lKind==="lent"?`${person} owes you ${fmt0(amt)}`:`You owe ${person} ${fmt0(amt)}`)}
+  catch(e){toast("Could not save",navigator.onLine?"Please try again":"You're offline","err")}
+};
+async function settleLoan(id,val){const l=LOANS.find(x=>x.id===id);if(!l)return;vib();
+  try{Object.assign(l,await api(`/api/loans/${id}/`,"PUT",{settled:val}));renderLoans();renderLoanRow();
+    toast(val?"Settled":"Marked open",`${l.person} · ${fmt0(l.amount)}`,val?"ok":"info");if(val)confetti(innerWidth/2,innerHeight/2)}
+  catch(e){toast("Could not update","","err")}}
+async function delLoan(id){const l=LOANS.find(x=>x.id===id);if(!l||!confirm(`Delete this entry for ${l.person}?`))return;
+  try{await api(`/api/loans/${id}/`,"DELETE");LOANS=LOANS.filter(x=>x.id!==id);renderLoans();renderLoanRow();toast("Deleted",l.person,"info")}
+  catch(e){toast("Could not delete","","err")}}
+loadLoans();
+
+/* ================= OFFLINE: save now, sync later ================= */
+const outbox=()=>{try{return JSON.parse(lsGet("outbox")||"[]")}catch(e){return[]}};
+const setOutbox=q=>lsSet("outbox",JSON.stringify(q));
+function queueOffline(body){
+  const item={...body,id:-Date.now(),created_at:new Date().toISOString(),pending:true};
+  setOutbox([...outbox(),item]);TX.unshift(item);sortTX();refresh();updateNet();
+  toast("Saved on this phone","It will sync when you're back online","info",null,3500);
+}
+let syncing=false;
+async function syncOutbox(){
+  const q=outbox();if(!q.length||syncing||!navigator.onLine)return;syncing=true;let done=0;
+  for(const item of q){
+    const {id,pending,created_at,...body}=item;
+    try{const saved=await api("/api/expenses/","POST",body);TX=TX.map(t=>t.id===id?saved:t);setOutbox(outbox().filter(x=>x.id!==id));done++}
+    catch(e){break}
+  }
+  syncing=false;if(done){sortTX();refresh();toast("Synced",`${done} offline ${done>1?"entries":"entry"} saved`);cacheData()}
+  updateNet();
+}
+function cacheData(){try{lsSet("cacheTX",JSON.stringify(TX.filter(t=>!t.pending)));lsSet("cacheWallet",JSON.stringify(WALLET))}catch(e){}}
+function updateNet(){
+  const n=outbox().length,off=!navigator.onLine,b=$("netBar");
+  b.className="netbar"+(off||n?" on":"")+(off?" off":"");
+  b.textContent=off?(n?`Offline · ${n} waiting to sync`:"Offline · new spends will be saved on this phone"):n?`Syncing ${n}…`:"";
+}
+addEventListener("online",()=>{updateNet();syncOutbox();loadLoans()});
+addEventListener("offline",updateNet);
+setInterval(syncOutbox,30000);
+/* pending entries can't be edited until they sync */
+const _openSheet=openSheet;openSheet=function(id=null,kind){const t=id&&TX.find(x=>x.id===id);
+  if(t&&t.pending){toast("Waiting to sync","You can edit it once you're online","info");return}return _openSheet(id,kind)};
+/* after the first load: cache data, or fall back to the cache when offline */
+(async function offlineInit(){
+  for(let i=0;i<40&&!TX.length&&navigator.onLine;i++)await new Promise(r=>setTimeout(r,100)); // wait for the normal load
+  if(TX.length)cacheData();
+  else{try{const c=JSON.parse(lsGet("cacheTX")||"[]"),w=JSON.parse(lsGet("cacheWallet")||"null");
+    if(c.length){TX=c;if(w)WALLET=w}}catch(e){}}
+  const q=outbox();q.forEach(p=>{if(!TX.some(t=>t.id===p.id))TX.unshift(p)});
+  if(q.length||!navigator.onLine){sortTX();refresh()}
+  updateNet();syncOutbox();
+})();
+
+/* ================= SMART INSIGHTS (Stats) ================= */
+function renderInsights(list,y,mo){
+  const key=`${y}-${String(mo+1).padStart(2,"0")}`,pk=iso(new Date(y,mo-1,15)).slice(0,7);
+  const E=list.filter(t=>t.kind==="expense"),PE=TX.filter(t=>t.kind==="expense"&&t.date.startsWith(pk));
+  const out=[],spent=sum(E),inc=sum(list.filter(t=>t.kind==="income"));
+  if(!E.length){$("insList").innerHTML=`<div class="empty card">Add a few spends to see insights.</div>`;return}
+  const by=(arr)=>{const m={};arr.forEach(t=>{const k=(t.note||"").trim().toLowerCase();if(!k)return;(m[k]=m[k]||{n:t.note.trim(),v:0,c:0});m[k].v+=+t.amount;m[k].c++});return m};
+  const cur=by(E),prev=by(PE);
+  // 1. biggest change vs last month
+  let best=null;for(const k in cur){const d=cur[k].v-(prev[k]?prev[k].v:0);if(prev[k]&&(!best||Math.abs(d)>Math.abs(best.d)))best={n:cur[k].n,d,v:cur[k].v}}
+  if(best&&Math.abs(best.d)>=50)out.push([best.d>0?"↑":"↓",best.d>0?"r":"g",`<b>${esc(best.n)}</b>: ${fmt0(best.v)} this month, <b>${fmt0(Math.abs(best.d))} ${best.d>0?"more":"less"}</b> than last month.`]);
+  // 2. month vs last month total
+  const ps=sum(PE);if(ps>0){const p=Math.round((spent-ps)/ps*100);if(Math.abs(p)>=5)out.push([p>0?"↑":"↓",p>0?"r":"g",`Total spending is <b>${Math.abs(p)}% ${p>0?"higher":"lower"}</b> than last month (${fmt0(ps)}).`])}
+  // 3. weekends vs weekdays (average per day that had spends)
+  const wk={we:[0,new Set()],wd:[0,new Set()]};E.forEach(t=>{const g=[0,6].includes(new Date(t.date+"T00:00").getDay())?wk.we:wk.wd;g[0]+=+t.amount;g[1].add(t.date)});
+  if(wk.we[1].size&&wk.wd[1].size){const a=wk.we[0]/wk.we[1].size,b=wk.wd[0]/wk.wd[1].size,p=Math.round((a-b)/b*100);
+    if(Math.abs(p)>=15)out.push(["◷",p>0?"r":"g",`Weekends cost you <b>${Math.abs(p)}% ${p>0?"more":"less"}</b> per day than weekdays.`])}
+  // 4. most frequent spend
+  const fr=Object.values(cur).sort((a,b)=>b.c-a.c)[0];
+  if(fr&&fr.c>=3)out.push(["⟳","b",`You bought <b>${esc(fr.n)}</b> ${fr.c} times, ${fmt0(fr.v)} in total.`]);
+  // 5. biggest single spend
+  const big=[...E].sort((a,b)=>b.amount-a.amount)[0];
+  out.push(["★","b",`Biggest spend: <b>${esc(big.note||"Untitled")}</b> ${fmt0(big.amount)} on ${new Date(big.date+"T00:00").toLocaleDateString('en',{day:'numeric',month:'short'})}.`]);
+  // 6. month-end forecast (current month only)
+  if(key===TODAY.slice(0,7)){const day=new Date().getDate(),dim=new Date(y,mo+1,0).getDate();
+    if(day>=5&&day<dim){const f=spent/day*dim,B=+WALLET.monthly_budget;
+      out.push(["→",B&&f>B?"r":"b",`At this pace you'll spend about <b>${fmt0(f)}</b> this month${B?(f>B?` — ${fmt0(f-B)} over budget`:` — within budget`):""}.`])}}
+  // 7. savings rate
+  if(inc>0){const r=Math.round((inc-spent)/inc*100);out.push([r>=0?"%":"!",r>=20?"g":r>=0?"b":"r",r>=0?`You saved <b>${r}%</b> of your income this month.`:`You spent <b>${Math.abs(r)}% more</b> than you earned this month.`])}
+  // 8. no-spend days
+  const days=key===TODAY.slice(0,7)?new Date().getDate():new Date(y,mo+1,0).getDate(),ns=days-new Set(E.map(t=>t.date)).size;
+  if(ns>0)out.push(["○","g",`<b>${ns} no-spend ${ns>1?"days":"day"}</b> this month.`]);
+  $("insList").innerHTML=out.slice(0,4).map(([ic,c,t])=>`<div class="ins"><span class="ins-i ${c}">${ic}</span><span>${t}</span></div>`).join("");
+  stagger($("insList"));
+}
+const _renderCal=renderCal;renderCal=function(list,y,mo){_renderCal(list,y,mo);renderInsights(list,y,mo)};
 </script>
 {% endblock %}

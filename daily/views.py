@@ -446,6 +446,7 @@ def backup_download(request):
                      "goal_since": w.goal_since.isoformat() if w.goal_since else None},
         "entries": [{"kind": e.kind, "amount": str(e.amount), "note": e.note, "date": e.date.isoformat(),
                      "category": e.category} for e in Expense.objects.filter(user=u).order_by("date", "id")],
+        "loans": [{"kind": l.kind, "person": l.person, "amount": str(l.amount), "note": l.note, "date": l.date.isoformat(), "settled": l.settled} for l in Loan.objects.filter(user=u)],
         "recurring": [{"kind": r.kind, "amount": str(r.amount), "note": r.note, "day": r.day,
                        "active": r.active, "last_applied": r.last_applied}
                       for r in Recurring.objects.filter(user=u)],
@@ -500,6 +501,21 @@ class RestoreApi(APIView):
                                      last_applied=str(r.get("last_applied", ""))[:7])
             have.add(key)
             rec_added += 1
+        from .models import Loan
+        have_l = set(Loan.objects.filter(user=u).values_list("kind", "person", "amount", "date"))
+        for l in data.get("loans", [])[:5000]:
+            try:
+                kind = "borrowed" if l.get("kind") == "borrowed" else "lent"
+                person = str(l["person"]).strip()[:60]
+                amt = Decimal(str(l["amount"])).quantize(Decimal("0.01"))
+                d = datetime.strptime(l["date"], "%Y-%m-%d").date()
+            except (KeyError, ValueError, TypeError, InvalidOperation):
+                continue
+            if not person or amt <= 0 or (kind, person, amt, d) in have_l:
+                continue
+            Loan.objects.create(user=u, kind=kind, person=person, amount=amt, date=d,
+                                note=str(l.get("note", ""))[:200], settled=bool(l.get("settled")))
+            have_l.add((kind, person, amt, d))
         return Response({"added": added, "skipped": skipped, "recurring_added": rec_added})
 
 
@@ -550,3 +566,38 @@ def forgot_password_page(request):
             login(request, user)
             return redirect("/?recovered=1")
     return render(request, "daily/forgot.html", ctx)
+
+
+# ---------- LEND & BORROW ----------
+
+from .models import Loan
+from .serializers import LoanSerializer
+
+
+@method_decorator(login_required, name="dispatch")
+class LoanListApi(APIView):
+    def get(self, request):
+        return Response(LoanSerializer(Loan.objects.filter(user=request.user), many=True).data)
+
+    def post(self, request):
+        s = LoanSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        s.save(user=request.user)
+        return Response(s.data, status=201)
+
+
+@method_decorator(login_required, name="dispatch")
+class LoanDetailApi(APIView):
+    def put(self, request, pk):
+        loan = get_object_or_404(Loan, pk=pk, user=request.user)
+        data = dict(request.data)
+        if "settled" in data:
+            data["settled_on"] = date.today().isoformat() if data["settled"] else None
+        s = LoanSerializer(loan, data=data, partial=True)
+        s.is_valid(raise_exception=True)
+        s.save()
+        return Response(s.data)
+
+    def delete(self, request, pk):
+        get_object_or_404(Loan, pk=pk, user=request.user).delete()
+        return Response(status=204)

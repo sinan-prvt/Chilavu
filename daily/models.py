@@ -88,3 +88,24 @@ class Recurring(models.Model):
 
     def __str__(self):
         return f"{self.user.username} {self.kind} {self.amount} on day {self.day}"
+
+
+class Loan(models.Model):
+    """Money lent to someone or borrowed from someone."""
+    KIND_CHOICES = [("lent", "Lent"), ("borrowed", "Borrowed")]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="loans")
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES, default="lent")
+    person = models.CharField(max_length=60)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    note = models.CharField(max_length=200, blank=True)
+    date = models.DateField(default=date.today)
+    settled = models.BooleanField(default=False)
+    settled_on = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["settled", "-date", "-created_at"]
+
+    def __str__(self):
+        return f"{self.user.username} {self.kind} {self.amount} {self.person}"

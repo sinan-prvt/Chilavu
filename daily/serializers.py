@@ -45,3 +45,23 @@ class RecurringSerializer(serializers.ModelSerializer):
         if not 1 <= value <= 31:
             raise serializers.ValidationError("Day must be between 1 and 31.")
         return value
+
+from .models import Loan
+
+
+class LoanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Loan
+        fields = ["id", "kind", "person", "amount", "note", "date", "settled", "settled_on", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Amount must be greater than 0.")
+        return value
+
+    def validate_person(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("Enter a name.")
+        return value
