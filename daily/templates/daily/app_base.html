@@ -94,6 +94,14 @@ if(/[?&]bye=1/.test(location.search)){
 #intro .tag{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:14px;
   opacity:0;animation:mlIn .7s ease 2.7s forwards}
 #intro.bye{animation:introOut .8s cubic-bezier(.7,0,.3,1) forwards}
+/* dark mode: brighter blue-to-green handwriting so it reads on the dark background */
+:root[data-theme="dark"] #hg stop:nth-child(1){stop-color:#8fb0ff}
+:root[data-theme="dark"] #hg stop:nth-child(2){stop-color:#6d93ff}
+:root[data-theme="dark"] #hg stop:nth-child(3){stop-color:#34d27a}
+:root[data-theme="dark"] #hg stop:nth-child(4){stop-color:#5af08e}
+:root[data-theme="dark"] #intro .tag{color:#a3a9bd}
+:root[data-theme="dark"] #intro::before{background:radial-gradient(600px 360px at 50% 40%,rgba(79,124,240,.22),transparent 70%)}
+:root[data-theme="dark"] #intro .imark{box-shadow:0 18px 40px -12px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.08)}
 @keyframes hwDraw{to{stroke-dashoffset:0}}
 @keyframes hwFill{to{fill-opacity:1;stroke-width:.6}}
 @keyframes mlIn{to{opacity:1;filter:blur(0);transform:none}}

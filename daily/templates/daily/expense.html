@@ -328,6 +328,19 @@ h2 button{font-size:13px;color:var(--primary);font-weight:600;background:none;bo
 
 /* ===== install banner ===== */
 /* install progress overlay */
+/* ===== dark mode polish ===== */
+:root[data-theme="dark"] .card3d{
+  background:radial-gradient(400px 200px at 100% 0%,rgba(79,124,240,.75),transparent 60%),radial-gradient(300px 200px at 0% 100%,rgba(22,194,95,.35),transparent 60%),#16245a;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 24px 48px -16px rgba(0,0,0,.8)}
+:root[data-theme="dark"] .card{border-color:#2a2d3a}
+:root[data-theme="dark"] .tx,:root[data-theme="dark"] .loan{border-color:#2a2d3a!important}
+:root[data-theme="dark"] .hello small,:root[data-theme="dark"] .h2s{color:#a3a9bd}
+:root[data-theme="dark"] .ri{background:#3a2f12}
+:root[data-theme="dark"] .tx .amt span.pend{background:#3a2f12!important;color:#fbbf24!important}
+:root[data-theme="dark"] .cd.l3{background:#3d63d6}
+:root[data-theme="dark"] .field::placeholder,:root[data-theme="dark"] .namef input::placeholder{color:#6b7186}
+:root[data-theme="dark"] .netbar.off{background:#475569}
+
 /* ===== consistent Home rhythm: same gap, same ring size ===== */
 #p-home>.card,#p-home>.qact,#p-home>.insight-chip{margin-top:12px}
 #p-home>.insight-chip{margin-left:0;margin-right:0}
