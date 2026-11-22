@@ -1,0 +1,397 @@
+{% extends 'daily/base.html' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Profile Info -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <div class="avatar-circle mx-auto mb-3"
+                        style="width: 100px; height: 100px; background: linear-gradient(135deg, var(--primary-color), #6366f1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white;">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <h4 class="mb-1">{{ user.username }}</h4>
+                    <p class="text-muted mb-0">{{ user.email }}</p>
+                    <div class="mt-3">
+                        <span class="badge bg-primary rounded-pill px-3 py-2">
+                            <i class="fas fa-medal me-2"></i>Level {{ level }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </button>
+                    <button class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-2"></i>Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="stat-value">{{ total_entries }}</div>
+                        <div class="stat-label">Total Entries</div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="stat-value">{{ days_active }}</div>
+                        <div class="stat-label">Active Days</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-value">{{ current_streak }}</div>
+                        <div class="stat-label">Current Streak</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-value">{{ completion_rate }}%</div>
+                        <div class="stat-label">Completion Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-8">
+
+        <!-- Stats Overview Row -->
+        <div class="row mb-4">
+            <!-- Task Distribution -->
+            <div class="col-md-6 mb-4 mb-md-0">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Task Completion</h5>
+                    </div>
+                    <!-- Simplified Stats Display instead of Chart -->
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div class="text-center">
+                            <h2 class="display-4 fw-bold text-primary">{{ completion_rate }}%</h2>
+                            <p class="text-muted">Overall Completion Rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Achievements</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 text-center mb-4">
+                                <div class="achievement-badge mx-auto mb-2">
+                                    <i class="fas fa-fire fa-2x"></i>
+                                </div>
+                                <h6>Current Streak</h6>
+                                <div class="streak-badge mx-auto">{{ current_streak }} days</div>
+                            </div>
+                            <div class="col-6 text-center mb-4">
+                                <div class="achievement-badge mx-auto mb-2">
+                                    <i class="fas fa-calendar-check fa-2x"></i>
+                                </div>
+                                <h6>Active Days</h6>
+                                <div class="streak-badge mx-auto">{{ days_active }} days</div>
+                            </div>
+                            <div class="col-6 text-center">
+                                <div class="achievement-badge mx-auto mb-2">
+                                    <i class="fas fa-star fa-2x"></i>
+                                </div>
+                                <h6>Best Streak</h6>
+                                <div class="streak-badge mx-auto">{{ best_streak }} days</div>
+                            </div>
+                            <div class="col-6 text-center">
+                                <div class="achievement-badge mx-auto mb-2">
+                                    <i class="fas fa-percentage fa-2x"></i>
+                                </div>
+                                <h6>Consistency</h6>
+                                <div class="streak-badge mx-auto">{{ consistency_rate }}%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comprehensive Task History -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Task History</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Tasks Completed</th>
+                                <th>Notes / Journal</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for routine in routine_history %}
+                            <tr onclick="window.location.href='/daily/?date={{ routine.date|date:'Y-m-d' }}'">
+                                <td>{{ routine.date }}</td>
+                                <td>
+                                    <div class="task-progress">
+                                        {% for i in "1234" %}
+                                        <div
+                                            class="task-indicator {% if forloop.counter <= routine.completed_count %}completed{% endif %}">
+                                        </div>
+                                        {% endfor %}
+                                        <small class="ms-2">{{ routine.completed_count }}/4</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if routine.journal %}
+                                    <span class="d-block text-wrap" style="max-width: 300px;">
+                                        {{ routine.journal }}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-muted fst-italic">No notes</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if routine.completed_count == 4 %}
+                                    <span class="badge bg-success">Perfect Day</span>
+                                    {% elif routine.completed_count >= 2 %}
+                                    <span class="badge bg-warning">Good Day</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Started</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    No activity found. Start tracking your daily routine!
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" value="{{ user.username }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-control" value="{{ user.email }}" name="email">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Daily Reminder Time</label>
+                        <input type="time" class="form-control" value="20:00" name="reminder_time">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Weekly Goal</label>
+                        <select class="form-select" name="weekly_goal">
+                            <option value="3">3 days per week</option>
+                            <option value="5" selected>5 days per week</option>
+                            <option value="7">Every day</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize main progress chart
+        const progressCtx = document.getElementById('progressChart').getContext('2d');
+        const progressChart = new Chart(progressCtx, {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Tasks Completed',
+                    data: [12, 19, 15, 25],
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Goal',
+                    data: [16, 16, 16, 16],
+                    borderColor: '#10b981',
+                    borderDash: [5, 5],
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 28,
+                        title: {
+                            display: true,
+                            text: 'Tasks Completed'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Initialize task distribution chart
+        const taskCtx = document.getElementById('taskDistributionChart').getContext('2d');
+        const taskChart = new Chart(taskCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Podcast', 'DSA', 'Reading', 'Journal'],
+                datasets: [{
+                    data: [85, 90, 75, 80],
+                    backgroundColor: [
+                        '#4f46e5',
+                        '#10b981',
+                        '#f59e0b',
+                        '#3b82f6'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.label}: ${context.parsed}% completion`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Update charts when time range changes
+        document.getElementById('timeRange').addEventListener('change', function () {
+            // In a real app, you would fetch new data from the server
+            showToast('Loading data for ' + this.value + ' days...', 'info');
+        });
+    });
+
+    function saveProfile() {
+        const form = document.getElementById('editProfileForm');
+        const formData = new FormData(form);
+
+        showLoading();
+
+        // In a real app, you would send this to your Django backend
+        setTimeout(() => {
+            hideLoading();
+            showToast('Profile updated successfully!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('editProfileModal')).hide();
+        }, 1000);
+    }
+</script>
+
+<style>
+    .avatar-circle {
+        width: 100px;
+        height: 100px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: white;
+        font-weight: bold;
+        margin: 0 auto;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+
+    .achievement-badge {
+        width: 70px;
+        height: 70px;
+        background: var(--bg-body-start);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+    }
+
+    .task-progress {
+        display: flex;
+        align-items: center;
+    }
+
+    .task-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--border-color);
+        margin-right: 3px;
+    }
+
+    .task-indicator.completed {
+        background: var(--success-color);
+    }
+
+    .table-hover tbody tr {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-main);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: var(--bg-body-start);
+        transform: translateX(5px);
+    }
+</style>
+{% endblock %}

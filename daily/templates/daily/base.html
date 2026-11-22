@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyTracker Pro | {% block title %}{% endblock %}</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            /* Base Colors (HSL for consistency) */
+            --primary-hue: 243;
+            --primary-saturation: 75%;
+            --primary-lightness: 59%;
+
+            --primary-color: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
+            --secondary-color: #10b981;
+            --accent-color: #f59e0b;
+
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+
+            /* Bootstrap Overrides */
+            --bs-primary: var(--primary-color);
+            --bs-secondary: var(--secondary-color);
+            --bs-success: var(--success-color);
+            --bs-danger: var(--danger-color);
+            --bs-warning: var(--warning-color);
+            --bs-info: var(--info-color);
+            --bs-body-bg: var(--bg-body-start);
+            --bs-body-color: var(--text-main);
+            --bs-border-color: var(--border-color);
+
+            /* Light Mode Defaults */
+            --bg-body-start: #f5f7fa;
+            --bg-body-end: #c3cfe2;
+            --bg-card: #ffffff;
+            --bg-nav: linear-gradient(90deg, var(--primary-color), #6366f1);
+            --bg-dropdown: #ffffff;
+            --bg-input: #ffffff;
+
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --text-inverse: #ffffff;
+
+            --border-color: #e5e7eb;
+            --border-radius: 12px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        [data-bs-theme="dark"] {
+            --bg-body-start: #111827;
+            --bg-body-end: #0f172a;
+            --bg-card: #1f2937;
+            --bg-nav: #1f2937;
+            --bg-dropdown: #1f2937;
+            --bg-input: #374151;
+
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --text-inverse: #ffffff;
+
+            --border-color: #374151;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Color Themes */
+        [data-theme-color="indigo"] {
+            --primary-hue: 243;
+            --primary-saturation: 75%;
+            --primary-lightness: 59%;
+        }
+
+        [data-theme-color="emerald"] {
+            --primary-hue: 158;
+            --primary-saturation: 64%;
+            --primary-lightness: 52%;
+        }
+
+        [data-theme-color="rose"] {
+            --primary-hue: 343;
+            --primary-saturation: 87%;
+            --primary-lightness: 64%;
+        }
+
+        [data-theme-color="amber"] {
+            --primary-hue: 38;
+            --primary-saturation: 92%;
+            --primary-lightness: 50%;
+        }
+
+        [data-theme-color="blue"] {
+            --primary-hue: 217;
+            --primary-saturation: 91%;
+            --primary-lightness: 60%;
+        }
+
+        [data-theme-color="purple"] {
+            --primary-hue: 270;
+            --primary-saturation: 95%;
+            --primary-lightness: 60%;
+        }
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-body-start) 0%, var(--bg-body-end) 100%);
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        .navbar {
+            background: var(--bg-nav);
+            box-shadow: var(--shadow);
+            padding: 1rem 0;
+            border-bottom: 1px solid transparent;
+        }
+
+        [data-bs-theme="dark"] .navbar {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            margin: 0 0.5rem;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .card {
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            margin-bottom: 1.5rem;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            background-color: var(--bg-input);
+            color: var(--text-main);
+            padding: 0.75rem 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 20px;
+        }
+
+        .stats-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+        }
+
+        .completed-task {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .streak-badge {
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: bold;
+        }
+
+        .calendar-day {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .calendar-day:hover {
+            background-color: #e5e7eb;
+        }
+
+        .calendar-day.completed {
+            background: linear-gradient(135deg, var(--success-color), #34d399);
+            color: white;
+        }
+
+        .calendar-day.partial {
+            background: linear-gradient(135deg, var(--accent-color), #fbbf24);
+            color: white;
+        }
+
+        .task-checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 2px solid #d1d5db;
+            cursor: pointer;
+        }
+
+        .task-checkbox:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'daily' %}">
+                <i class="fas fa-calendar-check me-2"></i>DailyTracker Pro
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                {% if user.is_authenticated %}
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'daily' %}">
+                            <i class="fas fa-home me-1"></i>Daily
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'calendar' %}">
+                            <i class="fas fa-calendar-alt me-1"></i>Calendar
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'profile' %}">
+                            <i class="fas fa-user me-1"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown">
+                            <i class="fas fa-cog me-1"></i>Settings
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                    data-bs-target="#themeSettingsModal"><i class="fas fa-palette me-2"></i>Theme
+                                    Settings</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-bell me-2"></i>Notifications</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}"><i
+                                        class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                {% else %}
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'signin' %}">
+                            <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-light rounded-pill px-4" href="{% url 'signup' %}">
+                            Sign Up Free
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container py-4">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-calendar-check me-2"></i>DailyTracker Pro</h5>
+                    <p class="text-muted">Build consistent habits, track your progress, and achieve your goals.</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="mb-0">&copy; {% now "Y" %} DailyTracker Pro. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Show loading overlay
+        function showLoading() {
+            document.getElementById('loading').style.display = 'flex';
+        }
+
+        // Hide loading overlay
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-bg-${type} border-0`;
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            // Remove toast after hiding
+            toast.addEventListener('hidden.bs.toast', function () {
+                toast.remove();
+            });
+        }
+
+        // Get CSRF token
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(";").shift();
+        }
+
+        // Auto-save functionality
+        let autoSaveTimer;
+        function setupAutoSave(form, saveUrl, interval = 3000) {
+            const inputs = form.querySelectorAll('input, textarea, select');
+
+            inputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    clearTimeout(autoSaveTimer);
+                    autoSaveTimer = setTimeout(() => {
+                        saveForm(form, saveUrl);
+                    }, interval);
+                });
+
+                // For text areas, also save on input with debounce
+                if (input.tagName === 'TEXTAREA') {
+                    input.addEventListener('input', () => {
+                        clearTimeout(autoSaveTimer);
+                        autoSaveTimer = setTimeout(() => {
+                            saveForm(form, saveUrl);
+                        }, interval);
+                    });
+                }
+            });
+        }
+
+        // Save form function
+        async function saveForm(form, url) {
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            // Handle checkboxes
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                data[cb.name] = cb.checked;
+            });
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showToast('Auto-saved successfully!', 'success');
+                }
+            } catch (error) {
+                console.error('Auto-save error:', error);
+            }
+        }
+
+        // Initialize theme and color from localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const savedColor = localStorage.getItem('themeColor') || 'indigo';
+
+            setThemeMode(savedTheme);
+            setThemeColor(savedColor);
+
+            // Set active state in modal
+            document.getElementById(`theme-${savedTheme}`).checked = true;
+            document.querySelectorAll('.theme-color-option').forEach(btn => {
+                if (btn.dataset.color === savedColor) btn.classList.add('active');
+            });
+        });
+
+        function setThemeMode(mode) {
+            document.documentElement.setAttribute('data-bs-theme', mode);
+            localStorage.setItem('theme', mode);
+
+            // Update toggle buttons visuals if needed
+        }
+
+        function setThemeColor(color) {
+            document.documentElement.setAttribute('data-theme-color', color);
+            localStorage.setItem('themeColor', color);
+
+            // Update modal selection
+            document.querySelectorAll('.theme-color-option').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-offset-2', 'ring-gray-400');
+                if (btn.dataset.color === color) {
+                    btn.classList.add('ring-2', 'ring-offset-2', 'ring-gray-400');
+                }
+            });
+        }
+    </script>
+
+    <!-- Theme Settings Modal -->
+    <div class="modal fade" id="themeSettingsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: var(--bg-card); color: var(--text-main);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-palette me-2"></i>Theme Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        style="{% if 'dark' in request.COOKIES.theme %}filter: invert(1);{% endif %}"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold mb-3">Display Mode</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check card-radio flex-fill p-0">
+                                <input class="form-check-input d-none" type="radio" name="themeMode" id="theme-light"
+                                    onclick="setThemeMode('light')">
+                                <label class="form-check-label w-100 p-3 border rounded text-center cursor-pointer"
+                                    for="theme-light" style="border-color: var(--border-color) !important;">
+                                    <i class="fas fa-sun fa-2x mb-2 text-warning"></i>
+                                    <div class="fw-medium">Light</div>
+                                </label>
+                            </div>
+                            <div class="form-check card-radio flex-fill p-0">
+                                <input class="form-check-input d-none" type="radio" name="themeMode" id="theme-dark"
+                                    onclick="setThemeMode('dark')">
+                                <label class="form-check-label w-100 p-3 border rounded text-center cursor-pointer"
+                                    for="theme-dark" style="border-color: var(--border-color) !important;">
+                                    <i class="fas fa-moon fa-2x mb-2 text-primary"></i>
+                                    <div class="fw-medium">Dark</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="form-label fw-bold mb-3">Accent Color</label>
+                        <div class="d-flex gap-3 flex-wrap justify-content-center">
+                            <button class="btn rounded-circle theme-color-option"
+                                style="width: 40px; height: 40px; background-color: #4f46e5;"
+                                onclick="setThemeColor('indigo')" data-color="indigo"></button>
+                            <button class="btn rounded-circle theme-color-option"
+                                style="width: 40px; height: 40px; background-color: #10b981;"
+                                onclick="setThemeColor('emerald')" data-color="emerald"></button>
+                            <button class="btn rounded-circle theme-color-option"
+                                style="width: 40px; height: 40px; background-color: #f59e0b;"
+                                onclick="setThemeColor('amber')" data-color="amber"></button>
+                            <button class="btn rounded-circle theme-color-option"
+                                style="width: 40px; height: 40px; background-color: #e11d48;"
+                                onclick="setThemeColor('rose')" data-color="rose"></button>
+                            <button class="btn rounded-circle theme-color-option"
+                                style="width: 40px; height: 40px; background-color: #3b82f6;"
+                                onclick="setThemeColor('blue')" data-color="blue"></button>
+                            <button class="btn rounded-circle theme-color-option"
+                                style="width: 40px; height: 40px; background-color: #9333ea;"
+                                onclick="setThemeColor('purple')" data-color="purple"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        .card-radio input:checked+label {
+            border-color: var(--primary-color) !important;
+            background-color: rgba(var(--primary-hue), 75%, 59%, 0.1);
+            position: relative;
+        }
+
+        .card-radio input:checked+label::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            color: var(--primary-color);
+        }
+    </style>
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,115 @@
+{% extends 'daily/app_base.html' %}
+{% block css %}
+body{background:radial-gradient(800px 420px at 50% -120px,#dfe8fb 0%,transparent 70%),var(--bg);overflow-x:hidden}
+.auth{position:relative;z-index:1;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:32px 20px;max-width:420px;margin:0 auto;perspective:1000px}
+
+/* floating 3D shapes */
+.bg3d{position:fixed;inset:0;pointer-events:none;overflow:hidden;perspective:800px;z-index:0}
+.shape{position:absolute;transform-style:preserve-3d}
+.coin{width:58px;height:58px;top:9%;right:10%;animation:spinY 5s linear infinite,bob 6s ease-in-out infinite}
+.coin i{position:absolute;inset:0;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:24px;color:#7a4b00;
+  background:radial-gradient(circle at 35% 30%,#fff3c4,#ffd54a 45%,#e0a100);box-shadow:inset 0 0 0 4px rgba(255,255,255,.4),inset 0 -5px 10px rgba(0,0,0,.18);backface-visibility:hidden}
+.coin i+i{transform:rotateY(180deg)}
+.coin2{width:38px;height:38px;bottom:12%;left:8%;top:auto;right:auto;animation-duration:3.6s,7s;animation-delay:0s,-2s}
+.cube{--s:46px;width:var(--s);height:var(--s);top:16%;left:9%;animation:tumble 12s linear infinite}
+.cube b{position:absolute;inset:0;border-radius:12px;background:linear-gradient(135deg,var(--primary-2),var(--primary));opacity:.9;border:1px solid rgba(255,255,255,.35)}
+.cube b:nth-child(1){transform:translateZ(calc(var(--s)/2))}.cube b:nth-child(2){transform:rotateY(180deg) translateZ(calc(var(--s)/2))}
+.cube b:nth-child(3){transform:rotateY(90deg) translateZ(calc(var(--s)/2));filter:brightness(.85)}.cube b:nth-child(4){transform:rotateY(-90deg) translateZ(calc(var(--s)/2));filter:brightness(.85)}
+.cube b:nth-child(5){transform:rotateX(90deg) translateZ(calc(var(--s)/2));filter:brightness(1.15)}.cube b:nth-child(6){transform:rotateX(-90deg) translateZ(calc(var(--s)/2));filter:brightness(.7)}
+.ring{width:90px;height:90px;bottom:16%;right:-14px;border-radius:50%;border:12px solid #38bdf8;opacity:.55;animation:ringRot 9s linear infinite}
+.blob{position:absolute;border-radius:50%;filter:blur(40px);opacity:.45;animation:bob 9s ease-in-out infinite}
+@keyframes spinY{to{transform:rotateY(360deg)}}
+@keyframes bob{50%{translate:0 -16px}}
+@keyframes tumble{to{transform:rotateX(360deg) rotateY(720deg)}}
+@keyframes ringRot{from{transform:rotateX(65deg) rotateZ(0)}to{transform:rotateX(65deg) rotateZ(360deg)}}
+
+/* logo */
+.logo{width:84px;height:84px;margin:0 auto 18px;border-radius:24px;display:block;position:relative;overflow:hidden;background:#fff;
+  box-shadow:0 7px 0 #dfe3f3,0 24px 44px -12px rgba(20,40,120,.45);
+  animation:logoIn 1s cubic-bezier(.2,1.4,.4,1) both,logoFloat 5s ease-in-out 1s infinite}
+.logo img{width:100%;height:100%;display:block}
+.logo::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.7) 48%,transparent 60%);
+  transform:translateX(-120%);animation:logoShine 4s 1.4s ease-in-out infinite}
+@keyframes logoShine{0%,55%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.wordmark{display:block;height:46px;margin:0 auto 24px;animation:wmIn 1s cubic-bezier(.2,1.3,.4,1) both,wmFloat 5s ease-in-out 1.2s infinite}
+@keyframes wmIn{from{opacity:0;transform:perspective(600px) rotateX(70deg) translateY(20px) scale(.8)}}
+@keyframes wmFloat{50%{transform:translateY(-4px)}}
+:root[data-theme="dark"] .wordmark.dark-hide{display:none}
+.wordmark.light-hide{display:none}:root[data-theme="dark"] .wordmark.light-hide{display:block}
+.logo svg{width:34px;height:34px}
+.brand{text-align:center;margin:0 0 16px;animation:up .7s .15s both}
+@keyframes logoIn{from{opacity:0;transform:rotateY(-540deg) rotateX(40deg) scale(.3)}}
+@keyframes logoFloat{50%{transform:translateY(-6px) rotateX(12deg) rotateY(-12deg)}}
+
+h1{text-align:center;font-size:27px;font-weight:800;letter-spacing:-.03em;animation:up .7s .2s cubic-bezier(.2,1.1,.3,1) both}
+.sub{text-align:center;color:var(--muted);margin:6px 0 28px;font-size:15px;animation:up .7s .3s cubic-bezier(.2,1.1,.3,1) both}
+@keyframes up{from{opacity:0;transform:translateY(16px)}}
+
+/* card */
+.box{padding:22px;display:grid;gap:14px;box-shadow:0 30px 60px -20px rgba(11,26,74,.28);transform-style:preserve-3d;transition:transform .2s ease-out;
+  animation:boxIn 1s .35s cubic-bezier(.2,1.2,.3,1) both;position:relative;overflow:hidden}
+.box::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.55) 48%,transparent 60%);transform:translateX(var(--shine,-120%));transition:transform .25s}
+:root[data-theme="dark"] .box::after{opacity:.15}
+@keyframes boxIn{from{opacity:0;transform:rotateX(40deg) translateY(50px) scale(.9)}}
+.box>*{animation:up .6s cubic-bezier(.2,1.1,.3,1) both;animation-delay:calc(.55s + var(--i,0)*60ms)}
+label{font-size:13px;color:var(--text);font-weight:600;margin-bottom:-6px}
+.field{transition:border-color .15s,box-shadow .15s,transform .15s}
+.field:focus{transform:translateZ(14px) scale(1.01)}
+.pw{position:relative}.pw .field{padding-right:52px}
+.eye{position:absolute;right:8px;top:50%;translate:0 -50%;width:38px;height:38px;border:0;background:none;color:var(--muted);border-radius:10px}
+.btn{position:relative;overflow:hidden;box-shadow:0 5px 0 #0f2463,var(--sh-p);transition:transform .1s,box-shadow .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #0f2463}
+.btn::before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);
+  transform:skewX(-20deg);animation:sweep 3s 1.6s ease-in-out infinite}
+@keyframes sweep{0%,60%{left:-60%}100%{left:130%}}
+.btn.loading{pointer-events:none;color:transparent}
+.btn.loading::after{content:"";position:absolute;inset:0;margin:auto;width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{background:var(--red-soft);color:var(--red);padding:12px 14px;border-radius:12px;font-size:14px;font-weight:500}
+.shake{animation:shake .45s!important}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.alt{text-align:center;margin-top:22px;color:var(--muted);font-size:14px;animation:up .7s 1s both}
+.alt a{color:var(--primary);font-weight:700;text-decoration:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+{% endblock %}
+{% block body %}
+<div class="bg3d" aria-hidden="true">
+  <div class="blob" style="width:260px;height:260px;left:-80px;top:30%;background:#86efac"></div>
+  <div class="blob" style="width:220px;height:220px;right:-60px;top:-40px;background:#7dd3fc;animation-delay:-4s"></div>
+  <div class="shape coin"><i>₹</i><i>₹</i></div>
+  <div class="shape coin coin2"><i>₹</i><i>₹</i></div>
+  <div class="shape cube"><b></b><b></b><b></b><b></b><b></b><b></b></div>
+  <div class="shape ring"></div>
+</div>
+<div class="auth">
+  <img class="wordmark dark-hide" src="/static/daily/icons/logo-wordmark.png" alt="Chilavu">
+  <img class="wordmark light-hide" src="/static/daily/icons/logo-wordmark-white.png" alt="">
+  {% block form %}{% endblock %}
+</div>
+<script>
+(function(){
+  const box=document.querySelector(".box");if(!box)return;
+  [...box.children].forEach((c,i)=>c.style.setProperty("--i",i));
+  // tilt with finger / mouse / phone tilt (starts after the entrance animation)
+  const wait=document.documentElement.classList.contains("intro-on")?4500:0;
+  let ready=false;setTimeout(()=>{ready=true;box.style.animation="none"},1400+wait);
+  const set=(x,y)=>{if(!ready)return;box.style.transform=`rotateX(${y*-10}deg) rotateY(${x*12}deg)`;box.style.setProperty("--shine",(x*140)+"%")};
+  document.addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;set(e.clientX/innerWidth-.5,e.clientY/innerHeight-.5)});
+  window.addEventListener("deviceorientation",e=>{if(e.gamma==null)return;set(Math.max(-.5,Math.min(.5,e.gamma/40)),Math.max(-.5,Math.min(.5,(e.beta-45)/40)))});
+  // shake on error
+  if(box.querySelector(".err"))setTimeout(()=>{box.style.animation="none";box.classList.add("shake");navigator.vibrate&&navigator.vibrate([20,40,20])},1450+wait);
+  // password eye toggle
+  box.querySelectorAll('input[type=password]').forEach(inp=>{
+    const w=document.createElement("div");w.className="pw";inp.before(w);w.appendChild(inp);
+    const b=document.createElement("button");b.type="button";b.className="eye";b.setAttribute("aria-label","Show password");
+    const eye='<svg class="i" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+    b.innerHTML=eye;b.onclick=()=>{const s=inp.type==="password";inp.type=s?"text":"password";b.innerHTML=s?'<svg class="i" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7a9.6 9.6 0 0 0 5.4-1.6"/></svg>':eye};
+    w.appendChild(b);
+  });
+  // loading spinner on submit
+  try{sessionStorage.removeItem("justSignedIn")}catch(e){}
+  box.addEventListener("submit",()=>{box.querySelector(".btn").classList.add("loading");try{sessionStorage.setItem("justSignedIn",location.pathname.indexOf("/signup")===0?"new":"1")}catch(e){}});
+})();
+</script>
+{% endblock %}

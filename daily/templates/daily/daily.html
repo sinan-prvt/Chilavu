@@ -1,0 +1,336 @@
+{% extends 'daily/base.html' %}
+{% load static %}
+
+{% block title %}Daily Routine{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar -->
+    <div class="col-lg-3 mb-4">
+        <div class="sidebar">
+            <div class="stats-card mb-4">
+                <h5 class="mb-3"><i class="fas fa-chart-line me-2"></i>Today's Progress</h5>
+                <div class="progress mb-2">
+                    <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+                </div>
+                <p class="mb-1"><small id="progressText">0/4 tasks completed</small></p>
+                <p class="mb-0"><small id="streakDisplay">Current streak: 0 days</small></p>
+            </div>
+
+            <div class="stats-card">
+                <h5 class="mb-3"><i class="fas fa-calendar-day me-2"></i>Quick Navigation</h5>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="loadYesterday()">
+                        <i class="fas fa-arrow-left me-2"></i>Previous Day
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="loadToday()">
+                        <i class="fas fa-redo me-2"></i>Today
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="loadTomorrow()">
+                        Next Day<i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-tasks me-2"></i>Daily Routine Tracker</h4>
+                <div class="d-flex align-items-center">
+                    <div class="input-group" style="width: 200px;">
+                        <input type="date" id="dateInput" class="form-control" value="{{ today|date:'Y-m-d' }}">
+                        <button class="btn btn-outline-primary" onclick="loadRoutine()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <form id="routineForm">
+                    {% csrf_token %}
+
+                    <!-- Podcast Task -->
+                    <div class="task-card mb-4 p-3 border rounded-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="form-check form-switch me-3">
+                                <input class="form-check-input task-switch" type="checkbox" name="podcast_done"
+                                    id="podcastDone" style="width: 3em; height: 1.5em;">
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-podcast me-2 text-primary"></i>
+                                    <label for="podcastDone" class="form-check-label mb-0">Listen to Podcast</label>
+                                </h5>
+                                <p class="text-muted mb-0"><small>Expand your knowledge</small></p>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">Learning</span>
+                        </div>
+                        <div class="mt-3">
+                            <label for="podcastReview" class="form-label">
+                                <i class="fas fa-comment-dots me-2"></i>Key Takeaways
+                            </label>
+                            <textarea class="form-control" name="podcast_review" id="podcastReview" rows="3"
+                                placeholder="What did you learn today?"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- DSA Task -->
+                    <div class="task-card mb-4 p-3 border rounded-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="form-check form-switch me-3">
+                                <input class="form-check-input task-switch" type="checkbox" name="dsa_done" id="dsaDone"
+                                    style="width: 3em; height: 1.5em;">
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-code me-2 text-success"></i>
+                                    <label for="dsaDone" class="form-check-label mb-0">DSA Practice</label>
+                                </h5>
+                                <p class="text-muted mb-0"><small>Sharpen your problem-solving skills</small></p>
+                            </div>
+                            <span class="badge bg-success rounded-pill">Coding</span>
+                        </div>
+                        <div class="mt-3">
+                            <label for="dsaNotes" class="form-label">
+                                <i class="fas fa-sticky-note me-2"></i>Notes & Insights
+                            </label>
+                            <textarea class="form-control" name="dsa_notes" id="dsaNotes" rows="3"
+                                placeholder="Problems solved, patterns learned..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Reading Task -->
+                    <div class="task-card mb-4 p-3 border rounded-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="form-check form-switch me-3">
+                                <input class="form-check-input task-switch" type="checkbox" name="reading_done"
+                                    id="readingDone" style="width: 3em; height: 1.5em;">
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-book me-2 text-warning"></i>
+                                    <label for="readingDone" class="form-check-label mb-0">Reading Time</label>
+                                </h5>
+                                <p class="text-muted mb-0"><small>Expand your horizons</small></p>
+                            </div>
+                            <span class="badge bg-warning rounded-pill">Reading</span>
+                        </div>
+                        <div class="mt-3">
+                            <label for="readingNotes" class="form-label">
+                                <i class="fas fa-lightbulb me-2"></i>Key Insights
+                            </label>
+                            <textarea class="form-control" name="reading_notes" id="readingNotes" rows="3"
+                                placeholder="What stood out to you?"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Journal Task -->
+                    <div class="task-card mb-4 p-3 border rounded-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="form-check form-switch me-3">
+                                <input class="form-check-input task-switch" type="checkbox" name="journal_done"
+                                    id="journalDone" style="width: 3em; height: 1.5em;">
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-feather-alt me-2 text-info"></i>
+                                    <label for="journalDone" class="form-check-label mb-0">Daily Journal</label>
+                                </h5>
+                                <p class="text-muted mb-0"><small>Reflect on your day</small></p>
+                            </div>
+                            <span class="badge bg-info rounded-pill">Reflection</span>
+                        </div>
+                        <div class="mt-3">
+                            <label for="journal" class="form-label">
+                                <i class="fas fa-pen me-2"></i>Today's Reflection
+                            </label>
+                            <textarea class="form-control" name="journal" id="journal" rows="4"
+                                placeholder="How was your day? What are you grateful for?"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                            <i class="fas fa-undo me-2"></i>Reset
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Button -->
+<button class="floating-btn" onclick="loadToday()" title="Go to Today">
+    <i class="fas fa-calendar-day"></i>
+</button>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize date picker
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('dateInput').value = today;
+
+        // Load today's routine
+        loadRoutine();
+
+        // Setup auto-save
+        setupAutoSave(document.getElementById('routineForm'), getCurrentSaveUrl(), 2000);
+
+        // Update progress on checkbox change
+        document.querySelectorAll('.task-switch').forEach(checkbox => {
+            checkbox.addEventListener('change', updateProgress);
+        });
+    });
+
+    function getCurrentSaveUrl() {
+        const dateStr = document.getElementById('dateInput').value;
+        return `/routine/${dateStr}/`;
+    }
+
+    async function loadRoutine() {
+        showLoading();
+        const dateStr = document.getElementById('dateInput').value;
+
+        try {
+            const response = await fetch(`/routine/${dateStr}/`);
+            const data = await response.json();
+
+            // Update form fields
+            document.getElementById('podcastDone').checked = data.podcast_done;
+            document.getElementById('podcastReview').value = data.podcast_review || '';
+            document.getElementById('dsaDone').checked = data.dsa_done;
+            document.getElementById('dsaNotes').value = data.dsa_notes || '';
+            document.getElementById('readingDone').checked = data.reading_done;
+            document.getElementById('readingNotes').value = data.reading_notes || '';
+            document.getElementById('journalDone').checked = data.journal_done;
+            document.getElementById('journal').value = data.journal || '';
+
+            updateProgress();
+            showToast('Routine loaded successfully!', 'success');
+        } catch (error) {
+            console.error('Error loading routine:', error);
+            showToast('Error loading routine', 'danger');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function saveRoutine(event) {
+        if (event) event.preventDefault();
+        showLoading();
+
+        const form = document.getElementById('routineForm');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Handle checkboxes
+        data.podcast_done = document.getElementById('podcastDone').checked;
+        data.dsa_done = document.getElementById('dsaDone').checked;
+        data.reading_done = document.getElementById('readingDone').checked;
+        data.journal_done = document.getElementById('journalDone').checked;
+
+        try {
+            const response = await fetch(getCurrentSaveUrl(), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                showToast('Routine saved successfully!', 'success');
+                updateProgress();
+            }
+        } catch (error) {
+            console.error('Error saving routine:', error);
+            showToast('Error saving routine', 'danger');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    function updateProgress() {
+        const checkboxes = document.querySelectorAll('.task-switch:checked');
+        const completed = checkboxes.length;
+        const total = 4;
+        const percentage = (completed / total) * 100;
+
+        document.getElementById('progressBar').style.width = `${percentage}%`;
+        document.getElementById('progressText').textContent = `${completed}/${total} tasks completed`;
+
+        // Update progress bar color based on completion
+        const progressBar = document.getElementById('progressBar');
+        progressBar.className = 'progress-bar';
+        if (percentage === 100) {
+            progressBar.classList.add('bg-success');
+        } else if (percentage >= 50) {
+            progressBar.classList.add('bg-warning');
+        } else {
+            progressBar.classList.add('bg-danger');
+        }
+    }
+
+    function loadToday() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('dateInput').value = today;
+        loadRoutine();
+    }
+
+    function loadYesterday() {
+        const dateInput = document.getElementById('dateInput');
+        const currentDate = new Date(dateInput.value);
+        currentDate.setDate(currentDate.getDate() - 1);
+        dateInput.value = currentDate.toISOString().split('T')[0];
+        loadRoutine();
+    }
+
+    function loadTomorrow() {
+        const dateInput = document.getElementById('dateInput');
+        const currentDate = new Date(dateInput.value);
+        currentDate.setDate(currentDate.getDate() + 1);
+        dateInput.value = currentDate.toISOString().split('T')[0];
+        loadRoutine();
+    }
+
+    function resetForm() {
+        if (confirm('Are you sure you want to reset all fields?')) {
+            document.getElementById('routineForm').reset();
+            updateProgress();
+        }
+    }
+
+    // Update form submission
+    document.getElementById('routineForm').addEventListener('submit', saveRoutine);
+</script>
+
+<style>
+    .task-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+
+    .task-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-check-input:checked {
+        background-color: var(--success-color);
+        border-color: var(--success-color);
+    }
+
+    .form-switch .form-check-input:focus {
+        box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25);
+    }
+</style>
+{% endblock %}

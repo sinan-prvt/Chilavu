@@ -1,0 +1,12 @@
+{% extends 'daily/auth_base.html' %}
+{% block title %}Sign in · Chilavu{% endblock %}
+{% block form %}
+<h1>Welcome back</h1><p class="sub">Track every rupee, every day.</p>
+<form method="post" class="card box">{% csrf_token %}
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+  <label>Username</label><input class="field" name="username" autocomplete="username" required value="{{ form.username.value|default:'' }}">
+  <label>Password</label><input class="field" type="password" name="password" autocomplete="current-password" required>
+  <button class="btn" type="submit">Sign in</button>
+</form>
+<p class="alt">New here? <a href="/signup/">Create account</a></p>
+{% endblock %}

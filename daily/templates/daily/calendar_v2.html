@@ -1,0 +1,204 @@
+{% extends 'daily/base.html' %}
+
+{% block title %}Calendar{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="display-6 mb-0"><i class="fas fa-calendar-alt me-2"></i>{{ month_name }} {{ current_year }}</h1>
+        <p class="text-muted">Track your progress day by day</p>
+    </div>
+    <div class="col-md-4 d-flex justify-content-end align-items-center">
+        <div class="btn-group">
+            <a href="{% url 'calendar-month' prev_year prev_month %}" class="btn btn-outline-primary">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <a href="{% url 'calendar' %}" class="btn btn-outline-secondary">
+                Today
+            </a>
+            <a href="{% url 'calendar-month' next_year next_month %}" class="btn btn-outline-primary">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <!-- Month Navigation -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">{{ month_name }} {{ current_year }}</h4>
+                    <select class="form-select" style="width: auto;" onchange="location = this.value;">
+                        {% for m in month_range %}
+                        <option value="{% url 'calendar-month' current_year m %}" {% if m == current_month %}selected{% endif %}>
+                            {{ m|date:"F" }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div class="calendar-grid mb-4">
+                    <div class="row mb-2 text-center">
+                        <div class="col day-header">Mon</div>
+                        <div class="col day-header">Tue</div>
+                        <div class="col day-header">Wed</div>
+                        <div class="col day-header">Thu</div>
+                        <div class="col day-header">Fri</div>
+                        <div class="col day-header">Sat</div>
+                        <div class="col day-header">Sun</div>
+                    </div>
+
+                    <div class="row">
+                        {% for day in calendar_data %}
+                        {% if forloop.counter0|divisibleby:7 and not forloop.first %}
+                    </div>
+                    <div class="row">
+                        {% endif %}
+
+                        <div class="col p-1">
+                            <div class="calendar-day {% if day.has_data %}{% if day.completed_tasks == 4 %}completed{% else %}partial{% endif %}{% endif %}"
+                                onclick="goToDate('{{ day.date|date:'Y-m-d' }}')" data-bs-toggle="tooltip"
+                                title="{{ day.completed_tasks }}/4 tasks completed">
+                                <div class="date-number">{{ day.date.day }}</div>
+                                <div class="task-dots">
+                                    {% for i in "1234" %}
+                                    {% if forloop.counter <= day.completed_tasks %} <div class="task-dot completed">
+                                </div>
+                                {% else %}
+                                <div class="task-dot"></div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="d-flex justify-content-center">
+                <div class="me-4">
+                    <span class="legend-dot completed me-2"></span>
+                    <small>All tasks done</small>
+                </div>
+                <div class="me-4">
+                    <span class="legend-dot partial me-2"></span>
+                    <small>Some tasks done</small>
+                </div>
+                <div>
+                    <span class="legend-dot me-2"></span>
+                    <small>No tasks</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Sidebar Removed -->
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+
+    function goToDate(dateStr) {
+        window.location.href = /daily/?date=;
+    }
+</script>
+
+<style>
+    .calendar-grid {
+        background: var(--bg-body-start);
+        padding: 20px;
+        border-radius: var(--border-radius);
+    }
+
+    .day-header {
+        font-weight: 600;
+        color: var(--text-main);
+        padding: 10px 0;
+    }
+
+    .calendar-day {
+        background: var(--bg-card);
+        border-radius: 10px;
+        padding: 10px;
+        margin: 2px;
+        min-height: 80px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .calendar-day:hover {
+        border-color: var(--primary-color);
+        transform: scale(1.05);
+    }
+
+    .calendar-day.completed {
+        background: rgba(16, 185, 129, 0.2);
+        border-color: var(--success-color);
+    }
+
+    .calendar-day.partial {
+        background: rgba(245, 158, 11, 0.2);
+        border-color: var(--warning-color);
+    }
+
+    .date-number {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+        color: var(--text-main);
+    }
+
+    .task-dots {
+        display: flex;
+        justify-content: center;
+        gap: 2px;
+    }
+
+    .task-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--border-color);
+    }
+
+    .task-dot.completed {
+        background: var(--success-color);
+    }
+
+    .legend-dot {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--border-color);
+    }
+
+    .legend-dot.completed {
+        background: var(--success-color);
+    }
+
+    .legend-dot.partial {
+        background: var(--warning-color);
+    }
+
+    .achievement-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}

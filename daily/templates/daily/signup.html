@@ -1,0 +1,13 @@
+{% extends 'daily/auth_base.html' %}
+{% block title %}Sign up · Chilavu{% endblock %}
+{% block form %}
+<h1>Create account</h1><p class="sub">Start mastering your money.</p>
+<form method="post" class="card box">{% csrf_token %}
+  {% if form.errors %}<div class="err">{% for f in form %}{% for e in f.errors %}{{ f.label }}: {{ e }}<br>{% endfor %}{% endfor %}{{ form.non_field_errors }}</div>{% endif %}
+  <label>Username</label><input class="field" name="username" autocomplete="username" required value="{{ form.username.value|default:'' }}">
+  <label>Email</label><input class="field" type="email" name="email" autocomplete="email" value="{{ form.email.value|default:'' }}">
+  <label>Password</label><input class="field" type="password" name="password" autocomplete="new-password" required>
+  <button class="btn" type="submit">Create account</button>
+</form>
+<p class="alt">Already have one? <a href="/signin/">Sign in</a></p>
+{% endblock %}

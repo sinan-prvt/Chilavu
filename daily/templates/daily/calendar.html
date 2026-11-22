@@ -1,0 +1,372 @@
+{% extends 'daily/base.html' %}
+
+{% block title %}Calendar - {{ month_name }} {{ current_year }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-md-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-5">
+        <div class="mb-3 mb-md-0">
+            <h1 class="display-5 fw-bold mb-2">
+                <i class="fas fa-calendar-alt me-3 text-primary"></i>{{ month_name }} {{ current_year }}
+            </h1>
+            <p class="text-muted fs-5 mb-0">Track your daily progress and achievements</p>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="d-flex align-items-center gap-2">
+            <a href="{% url 'calendar-month' prev_year prev_month %}" 
+               class="btn btn-light btn-icon rounded-circle" 
+               title="Previous month">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            
+            <a href="{% url 'calendar' %}" 
+               class="btn btn-primary px-4">
+                <i class="fas fa-calendar-day me-2"></i>Today
+            </a>
+            
+            <a href="{% url 'calendar-month' next_year next_month %}" 
+               class="btn btn-light btn-icon rounded-circle"
+               title="Next month">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Month Selector -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-body py-3">
+            <div class="row align-items-center">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 rounded-3 p-3 me-3">
+                            <i class="fas fa-calendar-check text-primary fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Month Overview</h6>
+                            <small class="text-muted">Click any day to view details</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <select class="form-select form-select-lg border-primary shadow-sm" 
+                                style="width: auto; min-width: 180px;" 
+                                onchange="location = this.value;">
+                            {% for m in month_range %}
+                            <option value="{% url 'calendar-month' current_year m %}" 
+                                    {% if m == current_month %}selected{% endif %}>
+                                {{ m|date:"F" }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="d-flex justify-content-md-end gap-3">
+                        <div class="text-center">
+                            <div class="fs-3 fw-bold text-success">{{ completed_days|default:"0" }}</div>
+                            <small class="text-muted">Perfect Days</small>
+                        </div>
+                        <div class="text-center">
+                            <div class="fs-3 fw-bold text-primary">{{ total_tasks|default:"0" }}</div>
+                            <small class="text-muted">Total Tasks</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-3 p-md-4">
+            <!-- Weekday Headers -->
+            <div class="row mb-3 g-2 text-center">
+                {% for day_name in "Mon,Tue,Wed,Thu,Fri,Sat,Sun"|split:"," %}
+                <div class="col p-2">
+                    <div class="text-uppercase text-muted fw-semibold fs-6">{{ day_name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Calendar Days -->
+            <div class="row g-2">
+                {% for day in calendar_data %}
+                {% if forloop.counter0|divisibleby:7 and not forloop.first %}
+            </div>
+            <div class="row g-2">
+                {% endif %}
+                
+                <div class="col p-2">
+                    <div class="calendar-day position-relative 
+                                {% if day.date|date:'Y-m-d' == today %}today-highlight{% endif %}
+                                {% if day.has_data %}{% if day.completed_tasks == 4 %}day-perfect{% else %}day-partial{% endif %}{% else %}day-empty{% endif %}"
+                         onclick="goToDate('{{ day.date|date:'Y-m-d' }}')"
+                         data-bs-toggle="tooltip"
+                         data-bs-placement="top"
+                         title="{{ day.completed_tasks }}/4 tasks completed • Click to view">
+                        
+                        <!-- Date Number -->
+                        <div class="date-number fw-bold mb-2
+                                    {% if day.date|date:'m' != current_month|stringformat:'02d' %}text-muted{% endif %}
+                                    {% if day.date|date:'Y-m-d' == today %}text-white{% endif %}">
+                            {{ day.date.day }}
+                            {% if day.date|date:'Y-m-d' == today %}
+                            <span class="badge bg-white text-primary ms-1" style="font-size: 0.6rem;">TODAY</span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Progress Dots -->
+                        <div class="progress-dots d-flex justify-content-center gap-1 mb-2">
+                            {% for i in "1234" %}
+                            <div class="progress-dot 
+                                        {% if forloop.counter <= day.completed_tasks %}dot-completed{% else %}dot-empty{% endif %}
+                                        {% if day.date|date:'Y-m-d' == today and forloop.counter <= day.completed_tasks %}dot-today{% endif %}">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Completion Indicator -->
+                        {% if day.has_data %}
+                        <div class="completion-indicator text-center">
+                            <small class="fw-semibold 
+                                        {% if day.completed_tasks == 4 %}text-success{% else %}text-warning{% endif %}
+                                        {% if day.date|date:'Y-m-d' == today %}text-white{% endif %}">
+                                {{ day.completed_tasks }}/4
+                            </small>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Hover Effect -->
+                        <div class="day-hover">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Legend & Info -->
+    <div class="row mt-5">
+        <div class="col-lg-8">
+            <div class="card border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Color Legend</h6>
+                    <div class="row">
+                        <div class="col-6 col-md-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="legend-indicator bg-success me-2"></div>
+                                <div>
+                                    <div class="fw-semibold">Perfect Day</div>
+                                    <small class="text-muted">All 4 tasks completed</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="legend-indicator bg-warning me-2"></div>
+                                <div>
+                                    <div class="fw-semibold">Partial Day</div>
+                                    <small class="text-muted">Some tasks completed</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="legend-indicator bg-secondary bg-opacity-10 me-2"></div>
+                                <div>
+                                    <div class="fw-semibold">No Tasks</div>
+                                    <small class="text-muted">No tasks logged</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="legend-indicator bg-primary me-2"></div>
+                                <div>
+                                    <div class="fw-semibold">Today</div>
+                                    <small class="text-muted">Current day</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-lightbulb me-2"></i>Tip of the Day
+                    </h6>
+                    <p class="mb-0">
+                        Consistency is key! Try to complete all 4 tasks every day to build strong habits. 
+                        Even partial progress is better than none at all.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize tooltips
+        const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(el => new bootstrap.Tooltip(el));
+        
+        // Add click animation
+        const days = document.querySelectorAll('.calendar-day');
+        days.forEach(day => {
+            day.addEventListener('click', function() {
+                this.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+    });
+
+    function goToDate(dateStr) {
+        window.location.href = `/daily/?date=${dateStr}`;
+    }
+</script>
+
+<style>
+    :root {
+        --primary-light: rgba(13, 110, 253, 0.1);
+        --success-light: rgba(25, 135, 84, 0.1);
+        --warning-light: rgba(255, 193, 7, 0.1);
+    }
+
+    .calendar-day {
+        background: white;
+        border-radius: 12px;
+        padding: 12px 8px;
+        min-height: 120px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .calendar-day:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary-color);
+    }
+
+    .calendar-day.day-perfect {
+        background: linear-gradient(135deg, var(--success-light), white);
+        border-color: var(--success-color);
+    }
+
+    .calendar-day.day-partial {
+        background: linear-gradient(135deg, var(--warning-light), white);
+        border-color: var(--warning-color);
+    }
+
+    .calendar-day.day-empty {
+        background: #f8f9fa;
+        border-color: #e9ecef;
+    }
+
+    .calendar-day.today-highlight {
+        background: linear-gradient(135deg, var(--primary-color), #0d6efd);
+        border-color: var(--primary-color);
+        color: white;
+    }
+
+    .date-number {
+        font-size: 1.5rem;
+        line-height: 1.2;
+    }
+
+    .progress-dots {
+        height: 20px;
+        align-items: center;
+    }
+
+    .progress-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .dot-completed {
+        background: var(--success-color);
+        box-shadow: 0 0 8px rgba(25, 135, 84, 0.4);
+    }
+
+    .dot-empty {
+        background: #dee2e6;
+    }
+
+    .dot-today {
+        background: white;
+    }
+
+    .day-hover {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+        transition: all 0.3s ease;
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .calendar-day:hover .day-hover {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.2;
+    }
+
+    .legend-indicator {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        flex-shrink: 0;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .calendar-day {
+            min-height: 90px;
+            padding: 8px 4px;
+        }
+        
+        .date-number {
+            font-size: 1.1rem;
+        }
+        
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .calendar-day {
+            min-height: 70px;
+        }
+        
+        .date-number {
+            font-size: 0.9rem;
+        }
+        
+        .completion-indicator small {
+            font-size: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
