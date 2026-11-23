@@ -283,38 +283,38 @@ class ExpenseListApi(APIView):
         return Response(ExpenseSerializer(qs, many=True).data)
 
     def post(self, request):
-        from django.core.cache import cache
+        from django.db import IntegrityError, transaction
         from django.utils import timezone
 
-        # Idempotency: the phone sends a unique key per entry, so retries
-        # (double taps, flaky network, offline sync) never create duplicates.
-        key = str(request.data.get("client_key") or "")[:64]
-        ck = f"exp-key:{request.user.pk}:{key}" if key else None
-        if ck:
-            existing_id = cache.get(ck)
-            if existing_id:
-                obj = Expense.objects.filter(pk=existing_id, user=request.user).first()
-                if obj:
-                    return Response(ExpenseSerializer(obj).data, status=200)
+        # Idempotency: the phone sends a unique key per entry, stored in the DB,
+        # so retries (double taps, flaky network, offline sync) never duplicate.
+        key = str(request.data.get("client_key") or "")[:64] or None
+        if key:
+            obj = Expense.objects.filter(user=request.user, client_key=key).first()
+            if obj:
+                return Response(ExpenseSerializer(obj).data, status=200)
 
         s = ExpenseSerializer(data=request.data)
         s.is_valid(raise_exception=True)
 
-        # Fallback: identical entry created in the last 2 minutes = a repeat.
-        v = s.validated_data
-        dup = Expense.objects.filter(
-            user=request.user, kind=v.get("kind", "expense"), amount=v["amount"],
-            note=v.get("note", ""), date=v.get("date", date.today()),
-            created_at__gte=timezone.now() - timedelta(minutes=2),
-        ).first()
-        if dup:
-            if ck:
-                cache.set(ck, dup.pk, 60 * 60 * 24 * 7)
-            return Response(ExpenseSerializer(dup).data, status=200)
+        if not key:
+            # Old app versions without a key: identical entry in last 2 min = repeat.
+            v = s.validated_data
+            dup = Expense.objects.filter(
+                user=request.user, kind=v.get("kind", "expense"), amount=v["amount"],
+                note=v.get("note", ""), date=v.get("date", date.today()),
+                created_at__gte=timezone.now() - timedelta(minutes=2),
+            ).first()
+            if dup:
+                return Response(ExpenseSerializer(dup).data, status=200)
 
-        obj = s.save(user=request.user)
-        if ck:
-            cache.set(ck, obj.pk, 60 * 60 * 24 * 7)
+        try:
+            with transaction.atomic():
+                s.save(user=request.user, client_key=key)
+        except IntegrityError:
+            # two copies arrived at the same moment; return the one that won
+            obj = Expense.objects.get(user=request.user, client_key=key)
+            return Response(ExpenseSerializer(obj).data, status=200)
         return Response(s.data, status=201)
 
 

@@ -45,9 +45,14 @@ class Expense(models.Model):
     note = models.CharField(max_length=200, blank=True)
     date = models.DateField(default=date.today)
     created_at = models.DateTimeField(auto_now_add=True)
+    # unique per-entry key sent by the phone, so retries never create duplicates
+    client_key = models.CharField(max_length=64, blank=True, null=True, editable=False)
 
     class Meta:
         ordering = ["-date", "-created_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["user", "client_key"], name="uniq_expense_client_key"),
+        ]
 
     def __str__(self):
         return f"{self.user.username} {self.kind} {self.amount} ({self.category})"
