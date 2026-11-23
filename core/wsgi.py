@@ -22,8 +22,14 @@ application = get_wsgi_application()
 if os.environ.get("VERCEL") and os.environ.get("AUTO_MIGRATE", "1") == "1":
     try:
         from django.core.management import call_command
-        call_command("migrate", interactive=False, verbosity=0)
-        call_command("createcachetable", verbosity=0)   # shared cache used by the login limits
+        from django.db import connection
+        from django.db.migrations.executor import MigrationExecutor
+        # One quick query to see if anything is pending; skip the slow
+        # migrate/createcachetable work on every cold start otherwise.
+        executor = MigrationExecutor(connection)
+        if executor.migration_plan(executor.loader.graph.leaf_nodes()):
+            call_command("migrate", interactive=False, verbosity=0)
+            call_command("createcachetable", verbosity=0)   # shared cache used by the login limits
     except Exception:  # never stop the site from starting because of this
         logging.getLogger(__name__).exception("Automatic migrate failed")
 

@@ -110,7 +110,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # local SQLite file otherwise.
 _db_url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL")
 if _db_url:
-    DATABASES = {"default": dj_database_url.parse(_db_url, conn_max_age=0, ssl_require=True)}
+    DATABASES = {"default": dj_database_url.parse(_db_url, conn_max_age=60, conn_health_checks=True, ssl_require=True)}
 else:
     DATABASES = {
         'default': {

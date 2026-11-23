@@ -1,5 +1,6 @@
 /* Chilavu service worker: offline shell + daily reminder */
-const CACHE = "chilavu-v5";
+const CACHE = "chilavu-v6";
+const LAUNCH = "/?source=pwa";   /* the manifest start_url */
 const SHELL = ["/", "/signin/", "/static/daily/icons/icon-192.png"];
 
 self.addEventListener("install", e => {
@@ -10,18 +11,37 @@ self.addEventListener("activate", e => {
     .then(() => self.clients.claim()));
 });
 
-/* network first, fall back to cache (pages + static). API is never cached. */
+/* App launch: show the cached home page instantly and refresh it in the background
+   (the server may be cold-starting). Everything else: network first, cache fallback.
+   API is never cached. */
+const isHome = url => url.pathname === "/" ;
+function store(req, res, url) {
+  if (!res.ok || res.redirected) return;
+  const copy = res.clone();
+  caches.open(CACHE).then(c => {
+    c.put(req, copy.clone());
+    if (req.mode === "navigate" && isHome(url)) c.put(LAUNCH, copy);   /* keep launch copy fresh (e.g. after sign-in) */
+  });
+}
 self.addEventListener("fetch", e => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== "GET" || url.origin !== location.origin || url.pathname.startsWith("/api/") || url.pathname === "/export.csv") return;
-  e.respondWith(
-    fetch(req).then(res => {
-      if (res.ok && (req.mode === "navigate" || url.pathname.startsWith("/static/"))) {
-        const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy));
-      }
-      return res;
-    }).catch(() => caches.match(req).then(r => r || caches.match("/")))
-  );
+  const net = fetch(req).then(res => {
+    if (req.mode === "navigate" || url.pathname.startsWith("/static/")) store(req, res, url);
+    return res;
+  });
+  if (req.mode === "navigate" && url.pathname + url.search === LAUNCH) {
+    e.respondWith(caches.match(LAUNCH).then(hit => {
+      if (hit) { e.waitUntil(net.catch(() => {})); return hit; }
+      return net.catch(() => caches.match("/"));
+    }));
+    return;
+  }
+  if (url.pathname.startsWith("/static/")) {   /* static files: cache first */
+    e.respondWith(caches.match(req).then(hit => hit || net));
+    return;
+  }
+  e.respondWith(net.catch(() => caches.match(req).then(r => r || caches.match("/"))));
 });
 
 /* ---------- daily reminder ---------- */
