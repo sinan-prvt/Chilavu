@@ -1158,7 +1158,7 @@ async function save(){
   if(!(amount>0)){toast("Enter an amount","Use the keypad below","err");shake($("val"));return}
   const inc=S.kind==="income";
   if(!name){toast("Add a name",inc?"e.g. Salary, Freelance":"e.g. Tea, Petrol, Lunch","err");shake($("note"));$("note").focus();return}
-  const body={kind:inc?"income":"expense",amount:amount.toFixed(2),category:inc?"income":"other",note:name,date:$("dt").value||TODAY};
+  const body={kind:inc?"income":"expense",amount:amount.toFixed(2),category:inc?"income":"other",note:name,date:$("dt").value||TODAY,client_key:(S.ck=S.ck||(Date.now().toString(36)+Math.random().toString(36).slice(2,10)))};
   setSaving(true);
   try{
     if(S.id){const u=await api(`/api/expenses/${S.id}/`,"PUT",body);TX=TX.map(t=>t.id===S.id?u:t)}
