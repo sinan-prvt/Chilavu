@@ -110,7 +110,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # local SQLite file otherwise.
 _db_url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL")
 if _db_url:
-    DATABASES = {"default": dj_database_url.parse(_db_url, conn_max_age=60, conn_health_checks=True, ssl_require=True)}
+    DATABASES = {"default": dj_database_url.parse(_db_url, conn_max_age=600, conn_health_checks=True, ssl_require=True)}
 else:
     DATABASES = {
         'default': {
@@ -202,3 +202,7 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 60 * 60 * 24 * 180   # browsers always use HTTPS for this site
     SECURE_HSTS_INCLUDE_SUBDOMAINS = False      # *.vercel.app is shared, so only this host
+
+# Speed: keep the login session in a signed cookie instead of the database,
+# so each request skips one round trip to Postgres.
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"

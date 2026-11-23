@@ -1159,6 +1159,22 @@ async function save(){
   const inc=S.kind==="income";
   if(!name){toast("Add a name",inc?"e.g. Salary, Freelance":"e.g. Tea, Petrol, Lunch","err");shake($("note"));$("note").focus();return}
   const body={kind:inc?"income":"expense",amount:amount.toFixed(2),category:inc?"income":"other",note:name,date:$("dt").value||TODAY,client_key:(S.ck=S.ck||(Date.now().toString(36)+Math.random().toString(36).slice(2,10)))};
+  if(!S.id){ // new entry: show it instantly, save in the background
+    const tmp={...body,id:-Date.now(),created_at:new Date().toISOString(),pending:true};
+    TX.unshift(tmp);sortTX();
+    closeSheet();const fb=document.querySelector(".fab").getBoundingClientRect();confetti(fb.left+fb.width/2,fb.top);
+    toast(inc?"Income added":"Spend added",`${name} · ${inc?"+":""}${money(amount)}`);refresh();
+    apiRaw("/api/expenses/","POST",body).then(saved=>{
+      if(saved)TX=TX.map(t=>t.id===tmp.id?saved:t);sortTX();refresh();cacheData();
+      if(!inc&&typeof checkBudget==="function")checkBudget();
+      if(inc&&typeof refreshWallet==="function")refreshWallet();
+    }).catch(e=>{
+      if(e instanceof TypeError||!navigator.onLine){ // no network: keep it on this phone, sync later
+        setOutbox([...outbox(),tmp]);updateNet();toast("Saved on this phone","It will sync when you're back online","info",null,3500);
+      }else{TX=TX.filter(t=>t.id!==tmp.id);refresh();toast("Could not save",name,"err")}
+    });
+    return;
+  }
   setSaving(true);
   try{
     if(S.id){const u=await api(`/api/expenses/${S.id}/`,"PUT",body);TX=TX.map(t=>t.id===S.id?u:t)}
@@ -1468,10 +1484,10 @@ $("recSave").onclick=async()=>{
   if(!(amt>0)){toast("Enter an amount","","err");$("recAmt").focus();return}
   const addNow=$("recNowRow").style.display!=="none"&&$("recNow").checked;
   try{
-    await api("/api/recurring/","POST",{kind:recKind,amount:amt.toFixed(2),note,day,add_now:addNow});
+    const rec=await api("/api/recurring/","POST",{kind:recKind,amount:amt.toFixed(2),note,day,add_now:addNow});
     $("recNote").value="";$("recAmt").value="";$("recNow").checked=false;
-    await loadRecs();
-    TX=await api("/api/expenses/")||TX;refresh();refreshWallet();
+    RECS=[...RECS.filter(x=>x.id!==rec.id),rec];drawRecs();
+    if(addNow)apiRaw("/api/expenses/").then(t=>{if(t){TX=t;refresh()}refreshWallet()}).catch(()=>{});
     toast("Repeat added",`${note} · every month on day ${day}${addNow?" (added for this month)":""}`);
   }catch(e){toast("Could not save","Check your connection","err")}
 };
