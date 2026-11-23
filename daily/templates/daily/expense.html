@@ -405,6 +405,13 @@ html,body{overscroll-behavior-y:contain}
 /* nav: lend & borrow item only in the laptop sidebar */
 .nav .desk-only{display:none}
 
+.key.ok.busy{opacity:.85;pointer-events:none}
+button.busy{position:relative;pointer-events:none;opacity:.7;color:transparent!important}
+button.busy::after{content:"";position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border:2.5px solid currentColor;border-color:rgba(127,127,127,.35);border-top-color:#4a6cf7;border-radius:50%;animation:kspin .7s linear infinite}
+.key.ok.busy::after{display:none}
+.key.ok.busy{color:#fff!important}
+.key .spin{display:inline-block;width:22px;height:22px;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:kspin .7s linear infinite;vertical-align:middle}
+@keyframes kspin{to{transform:rotate(360deg)}}
 /* ===== savings goal ===== */
 .goalc{display:flex;align-items:center;gap:14px;padding:14px 16px;margin-top:12px;cursor:pointer}
 .gring{--p:0;width:58px;height:58px;border-radius:50%;flex:none;display:grid;place-items:center;
@@ -905,7 +912,19 @@ const sum=L=>L.reduce((a,t)=>a+ +t.amount,0);
 const EXP=()=>TX.filter(t=>t.kind==="expense");
 const INC=()=>TX.filter(t=>t.kind==="income");
 
+/* lock whichever button triggered a save/delete/update until the server answers */
+let LAST_BTN=null,LAST_AT=0;
+document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.busy){e.preventDefault();e.stopImmediatePropagation();return}
+  LAST_BTN=b;LAST_AT=Date.now()},true);
+function lockBtn(){const b=LAST_BTN;if(!b||Date.now()-LAST_AT>1500||b.dataset.busy||!document.contains(b))return null;
+  b.dataset.busy="1";b.disabled=true;b.classList.add("busy");return b}
+function unlockBtn(b){if(!b)return;delete b.dataset.busy;b.disabled=false;b.classList.remove("busy")}
 async function api(url,method="GET",body){
+  const lk=method!=="GET"?lockBtn():null;
+  try{return await apiRaw(url,method,body)}finally{unlockBtn(lk)}
+}
+async function apiRaw(url,method="GET",body){
   const r=await fetch(url,{method,headers:{"Content-Type":"application/json","X-CSRFToken":csrf},body:body?JSON.stringify(body):undefined,credentials:"same-origin"});
   if(r.status===403||r.redirected){location.href="/signin/";return}
   if(!r.ok)throw new Error(await r.text());
@@ -1131,12 +1150,16 @@ function syncDates(){document.querySelectorAll(".dates [data-d]").forEach(b=>b.c
 document.querySelectorAll(".dates [data-d]").forEach(b=>b.onclick=()=>{vib();$("dt").value=dayAgo(+b.dataset.d);syncDates()});
 $("dt").onchange=syncDates;
 function shake(el){el.classList.remove("shake");void el.offsetWidth;el.classList.add("shake")}
+let SAVING=false;
+function setSaving(on){SAVING=on;const k=document.querySelector('#keys .key.ok');if(k){k.disabled=on;k.classList.toggle("busy",on);k.innerHTML=on?'<span class="spin"></span>':"✓"}}
 async function save(){
+  if(SAVING)return;
   const amount=evalExpr(S.expr),name=$("note").value.trim();
   if(!(amount>0)){toast("Enter an amount","Use the keypad below","err");shake($("val"));return}
   const inc=S.kind==="income";
   if(!name){toast("Add a name",inc?"e.g. Salary, Freelance":"e.g. Tea, Petrol, Lunch","err");shake($("note"));$("note").focus();return}
   const body={kind:inc?"income":"expense",amount:amount.toFixed(2),category:inc?"income":"other",note:name,date:$("dt").value||TODAY};
+  setSaving(true);
   try{
     if(S.id){const u=await api(`/api/expenses/${S.id}/`,"PUT",body);TX=TX.map(t=>t.id===S.id?u:t)}
     else{TX.unshift(await api("/api/expenses/","POST",body))}
@@ -1148,6 +1171,7 @@ async function save(){
     // no network: keep new entries on this phone and sync later
     if(!S.id&&(e instanceof TypeError||!navigator.onLine)&&typeof queueOffline==="function"){closeSheet();queueOffline(body);return}
     toast("Could not save","Check your connection","err")}
+  finally{setSaving(false)}
 }
 $("delBtn").onclick=()=>{const id=S.id;closeSheet();softDelete(id)};
 
