@@ -286,6 +286,7 @@ h2 button{font-size:13px;color:var(--primary);font-weight:600;background:none;bo
 @keyframes shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
 
 /* pull-to-refresh coin */
+html,body{overscroll-behavior-y:contain}
 .ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top) - 46px);z-index:40;transform:translate(-50%,0);opacity:0;
   width:46px;height:46px;border-radius:50%;background:var(--surface);box-shadow:var(--sh-2);display:grid;place-items:center;perspective:300px;transition:transform .3s,opacity .3s}
 .ptr-coin{width:28px;height:28px;position:relative;transform-style:preserve-3d}
