@@ -79,7 +79,7 @@ CSP = "; ".join([
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
     "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com",
     "img-src 'self' data: blob:",
-    "connect-src 'self'",
+    "connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
     "manifest-src 'self'",
     "worker-src 'self'",
     "object-src 'none'",

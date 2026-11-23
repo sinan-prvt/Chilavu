@@ -1,5 +1,5 @@
 /* Chilavu service worker: offline shell + daily reminder */
-const CACHE = "chilavu-v6";
+const CACHE = "chilavu-v7";
 const LAUNCH = "/?source=pwa";   /* the manifest start_url */
 const SHELL = ["/", "/signin/", "/static/daily/icons/icon-192.png"];
 
@@ -25,6 +25,13 @@ function store(req, res, url) {
 }
 self.addEventListener("fetch", e => {
   const req = e.request, url = new URL(req.url);
+  if (req.method === "GET" && /^fonts\.(googleapis|gstatic)\.com$/.test(url.hostname)) {   /* fonts: cache first */
+    e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(res => {
+      if (res.ok || res.type === "opaque") { const c = res.clone(); caches.open(CACHE).then(k => k.put(req, c)); }
+      return res;
+    })));
+    return;
+  }
   if (req.method !== "GET" || url.origin !== location.origin || url.pathname.startsWith("/api/") || url.pathname === "/export.csv") return;
   const net = fetch(req).then(res => {
     if (req.mode === "navigate" || url.pathname.startsWith("/static/")) store(req, res, url);
