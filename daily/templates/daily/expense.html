@@ -84,6 +84,17 @@ h2 button{font-size:13px;color:var(--primary);font-weight:600;background:none;bo
 .seg button.on{background:var(--surface);color:var(--text);box-shadow:var(--sh-1)}
 
 .set{padding:2px 16px;margin-top:4px}
+.pcard{display:flex;align-items:center;gap:14px;padding:18px}
+.pav{width:60px;height:60px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:24px;font-weight:800;color:#fff;background:linear-gradient(145deg,var(--primary-2),var(--primary))}
+.pinfo{min-width:0;display:flex;flex-direction:column;gap:3px}.pinfo b{font-size:18px;font-weight:700}
+.pinfo span{color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pinfo small{color:var(--soft);font-size:12px}
+.pbadge{font-style:normal;font-weight:700;color:var(--primary);background:var(--primary-soft);padding:2px 8px;border-radius:99px}
+.admlink{display:flex;align-items:center;gap:14px;padding:16px;text-decoration:none;color:var(--text)}
+.admlink:active{transform:scale(.99)}
+.admic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:var(--primary);background:var(--primary-soft);flex:none}
+.admtx{flex:1;display:flex;flex-direction:column;gap:2px}.admtx b{font-size:15px}.admtx small{color:var(--muted);font-size:13px}
+.admlink>svg:last-child{color:var(--soft)}
 .srow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);font-weight:500;font-size:15px}
 .srow:last-child{border:0}.srow a{color:var(--primary);text-decoration:none;font-weight:600}
 .srow input{width:130px;text-align:right;padding:10px 12px}.srow select{width:90px;padding:10px}
@@ -772,6 +783,23 @@ html.locked body{overflow:hidden}
   <!-- SETTINGS -->
   <section class="page" id="p-settings">
     <div class="ptitle">Profile</div>
+    <div class="card pcard">
+      <div class="pav">{{ user.username|first|upper }}</div>
+      <div class="pinfo">
+        <b>{{ user.get_full_name|default:user.username|title }}</b>
+        <span>@{{ user.username }}{% if user.email %} · {{ user.email }}{% endif %}</span>
+        <small>Member since {{ user.date_joined|date:"M Y" }}{% if user.is_staff %} · <i class="pbadge">Admin</i>{% endif %}</small>
+      </div>
+    </div>
+    {% if user.is_staff %}
+    <h2>Admin</h2>
+    <a class="card admlink" href="/dashboard/">
+      <span class="admic"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg></span>
+      <span class="admtx"><b>Admin dashboard</b><small>Users, activity and app-wide stats</small></span>
+      <svg class="i" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
+    {% endif %}
+    <h2>Preferences</h2>
     <div class="card set">
       <div class="srow">Monthly budget<input class="field" id="setBudget" type="number" inputmode="decimal" placeholder="Optional"></div>
       <div class="srow">Currency<select class="field" id="setCur"><option>₹</option><option>$</option><option>€</option><option>£</option><option>AED</option></select></div>

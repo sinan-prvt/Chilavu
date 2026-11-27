@@ -682,3 +682,91 @@ class LoanDetailApi(APIView):
     def delete(self, request, pk):
         get_object_or_404(Loan, pk=pk, user=request.user).delete()
         return Response(status=204)
+
+
+# ---------- ADMIN DASHBOARD (staff only) ----------
+
+from django.contrib.auth import get_user_model
+from django.db.models import Count, Sum, Max, Q
+from django.http import Http404, JsonResponse
+from .models import Loan, Recurring
+
+
+def _staff_only(request):
+    if not (request.user.is_authenticated and request.user.is_staff):
+        raise Http404()
+
+
+@login_required
+def admin_dashboard(request):
+    _staff_only(request)
+    User = get_user_model()
+    today = date.today()
+    month_start = today.replace(day=1)
+    week_ago = today - timedelta(days=6)
+
+    users = (User.objects
+             .annotate(entries=Count("expenses", distinct=True),
+                       last_entry=Max("expenses__date"),
+                       spent=Sum("expenses__amount", filter=Q(expenses__kind="expense")))
+             .order_by("-date_joined"))
+
+    month_qs = Expense.objects.filter(date__gte=month_start, date__lte=today)
+    totals = month_qs.aggregate(
+        spent=Sum("amount", filter=Q(kind="expense")),
+        income=Sum("amount", filter=Q(kind="income")),
+    )
+
+    # sign-ups and entries over the last 14 days
+    start14 = today - timedelta(days=13)
+    signups = defaultdict(int)
+    for d in User.objects.filter(date_joined__date__gte=start14).values_list("date_joined", flat=True):
+        signups[d.date()] += 1
+    entries_by_day = dict(Expense.objects.filter(created_at__date__gte=start14)
+                          .values_list("created_at__date").annotate(n=Count("id")))
+    days = []
+    for i in range(14):
+        d = start14 + timedelta(days=i)
+        days.append({"d": d, "signups": signups.get(d, 0), "entries": entries_by_day.get(d, 0)})
+    peak = max([x["entries"] for x in days] + [1])
+    for x in days:
+        x["pct"] = round(x["entries"] * 100 / peak)
+
+    cats = list(month_qs.filter(kind="expense").values("category")
+                .annotate(total=Sum("amount"), n=Count("id")).order_by("-total")[:6])
+    cat_peak = max([c["total"] for c in cats] + [1])
+    for c in cats:
+        c["pct"] = round(float(c["total"]) * 100 / float(cat_peak))
+
+    ctx = {
+        "users": users,
+        "stats": {
+            "users": users.count(),
+            "new_month": User.objects.filter(date_joined__date__gte=month_start).count(),
+            "active_week": Expense.objects.filter(date__gte=week_ago).values("user").distinct().count(),
+            "staff": User.objects.filter(is_staff=True).count(),
+            "entries": Expense.objects.count(),
+            "entries_today": Expense.objects.filter(created_at__date=today).count(),
+            "spent_month": totals["spent"] or 0,
+            "income_month": totals["income"] or 0,
+            "loans_open": Loan.objects.filter(settled=False).count(),
+            "recurring": Recurring.objects.filter(active=True).count(),
+        },
+        "days": days,
+        "cats": cats,
+        "month": today.strftime("%B %Y"),
+    }
+    return render(request, "daily/admin_dashboard.html", ctx)
+
+
+@login_required
+@require_POST
+def admin_toggle_user(request, pk):
+    _staff_only(request)
+    User = get_user_model()
+    target = get_object_or_404(User, pk=pk)
+    if target.pk == request.user.pk or target.is_superuser:
+        return JsonResponse({"error": "You can't disable this account"}, status=400)
+    target.is_active = not target.is_active
+    target.save(update_fields=["is_active"])
+    return JsonResponse({"active": target.is_active})

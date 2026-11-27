@@ -111,12 +111,12 @@ if(/[?&]bye=1/.test(location.search)){
 <script>
 (function(){
   var show=false;
-  var p=location.pathname,authPage=p.indexOf("/signin")===0||p.indexOf("/signup")===0||p.indexOf("/forgot")===0,justIn=false,isNew=false;
+  var p=location.pathname,authPage=p.indexOf("/signin")===0||p.indexOf("/signup")===0||p.indexOf("/forgot")===0,noIntro=p.indexOf("/dashboard")===0,justIn=false,isNew=false;
   try{
     var js=sessionStorage.getItem("justSignedIn");justIn=!authPage&&!!js;isNew=js==="new";
     if(!authPage)sessionStorage.removeItem("justSignedIn");
     // play on every open / reload; skip only when a sign-in or sign-up attempt was just rejected
-    show=!(authPage&&js)&&!matchMedia("(prefers-reduced-motion: reduce)").matches;
+    show=!noIntro&&!(authPage&&js)&&!matchMedia("(prefers-reduced-motion: reduce)").matches;
   }catch(e){}
   if(show&&justIn){var tg=document.getElementById("introTag"),nm=tg.getAttribute("data-user");tg.textContent=(isNew?"Welcome":"Welcome back")+(nm?", "+nm:"")}
   if(!show){document.getElementById("intro").remove();return}

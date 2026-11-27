@@ -22,6 +22,8 @@ from .views import (
     forgot_password_page,
     LoanListApi,
     LoanDetailApi,
+    admin_dashboard,
+    admin_toggle_user,
 )
 
 urlpatterns = [
@@ -41,6 +43,10 @@ urlpatterns = [
     path("forgot/", forgot_password_page, name="forgot"),
     path("api/loans/", LoanListApi.as_view(), name="loan-list"),
     path("api/loans/<int:pk>/", LoanDetailApi.as_view(), name="loan-detail"),
+
+    # admin dashboard (staff only)
+    path("dashboard/", admin_dashboard, name="admin-dashboard"),
+    path("dashboard/users/<int:pk>/toggle/", admin_toggle_user, name="admin-toggle-user"),
 
     # Old habit tracker (kept)
     path("daily/", daily_page, name="daily-page"),
