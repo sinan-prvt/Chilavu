@@ -1,5 +1,5 @@
 /* Chilavu service worker: offline shell + daily reminder */
-const CACHE = "chilavu-v7";
+const CACHE = "chilavu-v8";
 const LAUNCH = "/?source=pwa";   /* the manifest start_url */
 const SHELL = ["/", "/signin/", "/static/daily/icons/icon-192.png"];
 
