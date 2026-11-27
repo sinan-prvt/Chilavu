@@ -21,7 +21,7 @@ class AdminDashboardTests(_TC):
         self.client.force_login(self.admin)
         self.assertContains(self.client.get("/"), 'href="/dashboard/"')
         r = self.client.get("/dashboard/")
-        self.assertContains(r, "Total users")
+        self.assertContains(r, "Admin control")
         self.assertContains(r, "normal")
 
     def test_toggle_user(self):
@@ -29,3 +29,32 @@ class AdminDashboardTests(_TC):
         r = self.client.post(f"/dashboard/users/{self.user.pk}/toggle/")
         self.assertEqual(r.json(), {"active": False})
         self.assertEqual(self.client.post(f"/dashboard/users/{self.admin.pk}/toggle/").status_code, 400)
+
+
+from django.core.files.uploadedfile import SimpleUploadedFile as _Up
+
+
+class ProfilePhotoTests(_TC):
+    JPG = b"\xff\xd8\xff\xe0" + b"0" * 200
+
+    def setUp(self):
+        self.u = _User.objects.create_user("pic", password="x-pass-123")
+        self.client.force_login(self.u)
+
+    def test_upload_view_remove(self):
+        self.assertEqual(self.client.get("/api/photo/").status_code, 404)
+        r = self.client.post("/api/photo/", {"photo": _Up("a.jpg", self.JPG, "image/jpeg")})
+        self.assertEqual(r.status_code, 200)
+        r = self.client.get("/api/photo/")
+        self.assertEqual((r.status_code, r["Content-Type"], r.content), (200, "image/jpeg", self.JPG))
+        self.assertEqual(self.client.delete("/api/photo/").status_code, 200)
+        self.assertEqual(self.client.get("/api/photo/").status_code, 404)
+
+    def test_rejects_non_images_and_big_files(self):
+        r = self.client.post("/api/photo/", {"photo": _Up("a.jpg", b"<script>", "image/jpeg")})
+        self.assertEqual(r.status_code, 400)
+        r = self.client.post("/api/photo/", {"photo": _Up("a.jpg", self.JPG + b"0" * 400_000, "image/jpeg")})
+        self.assertEqual(r.status_code, 400)
+
+    def test_profile_page_has_picker(self):
+        self.assertContains(self.client.get("/"), 'id="phFile"')

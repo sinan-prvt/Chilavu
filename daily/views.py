@@ -687,9 +687,9 @@ class LoanDetailApi(APIView):
 # ---------- ADMIN DASHBOARD (staff only) ----------
 
 from django.contrib.auth import get_user_model
-from django.db.models import Count, Sum, Max, Q
+from django.db.models import Count, Sum, Max, Q, Exists, OuterRef
 from django.http import Http404, JsonResponse
-from .models import Loan, Recurring
+from .models import Loan, Recurring, ProfilePhoto
 
 
 def _staff_only(request):
@@ -705,25 +705,40 @@ def admin_dashboard(request):
     month_start = today.replace(day=1)
     week_ago = today - timedelta(days=6)
 
-    users = (User.objects
-             .annotate(entries=Count("expenses", distinct=True),
-                       last_entry=Max("expenses__date"),
-                       spent=Sum("expenses__amount", filter=Q(expenses__kind="expense")))
-             .order_by("-date_joined"))
+    start14 = today - timedelta(days=13)
 
-    month_qs = Expense.objects.filter(date__gte=month_start, date__lte=today)
-    totals = month_qs.aggregate(
-        spent=Sum("amount", filter=Q(kind="expense")),
-        income=Sum("amount", filter=Q(kind="income")),
+    # 1) every user with their entry stats (one query, list reused for counts below)
+    users = list(User.objects
+                 .annotate(entries=Count("expenses"),
+                           month_entries=Count("expenses", filter=Q(expenses__date__gte=month_start)),
+                           last_entry=Max("expenses__date"),
+                           has_photo=Exists(ProfilePhoto.objects.filter(user=OuterRef("pk"))))
+                 .order_by("-date_joined"))
+
+    # 2) all expense-wide numbers in one query
+    ex = Expense.objects.aggregate(
+        entries=Count("id"),
+        entries_today=Count("id", filter=Q(created_at__date=today)),
+        active_week=Count("user", distinct=True, filter=Q(date__gte=week_ago)),
+        spent=Sum("amount", filter=Q(kind="expense", date__gte=month_start, date__lte=today)),
+        income=Sum("amount", filter=Q(kind="income", date__gte=month_start, date__lte=today)),
     )
 
-    # sign-ups and entries over the last 14 days
-    start14 = today - timedelta(days=13)
-    signups = defaultdict(int)
-    for d in User.objects.filter(date_joined__date__gte=start14).values_list("date_joined", flat=True):
-        signups[d.date()] += 1
+    # 3) entries per day for the last 14 days
     entries_by_day = dict(Expense.objects.filter(created_at__date__gte=start14)
                           .values_list("created_at__date").annotate(n=Count("id")))
+
+    # 4) top categories this month
+    cats = list(Expense.objects.filter(kind="expense", date__gte=month_start, date__lte=today)
+                .values("category").annotate(total=Sum("amount")).order_by("-total")[:6])
+
+    # 5–6) open loans and active repeats
+    loans_open = Loan.objects.filter(settled=False).count()
+    recurring = Recurring.objects.filter(active=True).count()
+
+    signups = defaultdict(int)
+    for u in users:
+        signups[u.date_joined.date()] += 1
     days = []
     for i in range(14):
         d = start14 + timedelta(days=i)
@@ -732,8 +747,30 @@ def admin_dashboard(request):
     for x in days:
         x["pct"] = round(x["entries"] * 100 / peak)
 
-    cats = list(month_qs.filter(kind="expense").values("category")
-                .annotate(total=Sum("amount"), n=Count("id")).order_by("-total")[:6])
+    # sparkline points for the 14-day entries line (viewBox 0..280 x 0..60)
+    spark = " ".join(f"{i * 280 / 13:.1f},{56 - x['pct'] * 0.5:.1f}" for i, x in enumerate(days))
+
+    # donut segments for top categories
+    palette = ["#2f5bd6", "#16c25f", "#f5a524", "#f04463", "#8b5cf6", "#06b6d4"]
+    cat_sum = float(sum(c["total"] for c in cats)) or 1.0
+    donut, offset = [], 0.0
+    for i, c in enumerate(cats):
+        share = float(c["total"]) * 100 / cat_sum
+        c["color"], c["share"] = palette[i % len(palette)], round(share)
+        donut.append({"color": c["color"], "len": f"{share:.2f}", "off": f"{-offset:.2f}"})
+        offset += share
+
+    # most active users this month
+    leaders = sorted([u for u in users if u.month_entries], key=lambda u: -u.month_entries)[:5]
+    lead_peak = max([u.month_entries for u in leaders] + [1])
+    for u in leaders:
+        u.lead_pct = round(u.month_entries * 100 / lead_peak)
+
+    # 7) latest activity feed
+    feed = list(Expense.objects.select_related("user").order_by("-created_at")[:8])
+    inactive = sum(1 for u in users if not u.entries)
+    active_pct = round(ex["active_week"] * 100 / len(users)) if users else 0
+
     cat_peak = max([c["total"] for c in cats] + [1])
     for c in cats:
         c["pct"] = round(float(c["total"]) * 100 / float(cat_peak))
@@ -741,20 +778,27 @@ def admin_dashboard(request):
     ctx = {
         "users": users,
         "stats": {
-            "users": users.count(),
-            "new_month": User.objects.filter(date_joined__date__gte=month_start).count(),
-            "active_week": Expense.objects.filter(date__gte=week_ago).values("user").distinct().count(),
-            "staff": User.objects.filter(is_staff=True).count(),
-            "entries": Expense.objects.count(),
-            "entries_today": Expense.objects.filter(created_at__date=today).count(),
-            "spent_month": totals["spent"] or 0,
-            "income_month": totals["income"] or 0,
-            "loans_open": Loan.objects.filter(settled=False).count(),
-            "recurring": Recurring.objects.filter(active=True).count(),
+            "users": len(users),
+            "new_month": sum(1 for u in users if u.date_joined.date() >= month_start),
+            "active_week": ex["active_week"],
+            "staff": sum(1 for u in users if u.is_staff),
+            "entries": ex["entries"],
+            "entries_today": ex["entries_today"],
+            "spent_month": ex["spent"] or 0,
+            "income_month": ex["income"] or 0,
+            "loans_open": loans_open,
+            "recurring": recurring,
         },
         "days": days,
         "cats": cats,
         "month": today.strftime("%B %Y"),
+        "today": today,
+        "spark": spark,
+        "donut": donut,
+        "leaders": leaders,
+        "feed": feed,
+        "inactive": inactive,
+        "active_pct": active_pct,
     }
     return render(request, "daily/admin_dashboard.html", ctx)
 
@@ -770,3 +814,44 @@ def admin_toggle_user(request, pk):
     target.is_active = not target.is_active
     target.save(update_fields=["is_active"])
     return JsonResponse({"active": target.is_active})
+
+
+# ---------- PROFILE PHOTO ----------
+
+from django.views.decorators.cache import cache_control
+from .models import ProfilePhoto
+
+PHOTO_MAX_BYTES = 300 * 1024
+_PHOTO_TYPES = {b"\xff\xd8\xff": "image/jpeg", b"\x89PNG": "image/png", b"RIFF": "image/webp"}
+
+
+@login_required
+@cache_control(private=True, no_cache=True)
+def profile_photo(request):
+    if request.method == "GET":
+        p = ProfilePhoto.objects.filter(user=request.user).first()
+        if not p:
+            raise Http404()
+        return HttpResponse(bytes(p.image), content_type=p.content_type)
+    if request.method == "DELETE":
+        ProfilePhoto.objects.filter(user=request.user).delete()
+        return JsonResponse({"ok": True})
+    if request.method == "POST":
+        f = request.FILES.get("photo")
+        if not f or f.size > PHOTO_MAX_BYTES:
+            return JsonResponse({"error": "Photo is too large"}, status=400)
+        data = f.read()
+        ctype = next((t for sig, t in _PHOTO_TYPES.items() if data.startswith(sig)), None)
+        if not ctype or (ctype == "image/webp" and data[8:12] != b"WEBP"):
+            return JsonResponse({"error": "Please choose a JPG, PNG or WebP image"}, status=400)
+        ProfilePhoto.objects.update_or_create(user=request.user, defaults={"image": data, "content_type": ctype})
+        return JsonResponse({"ok": True})
+    return HttpResponse(status=405)
+
+
+@login_required
+@cache_control(private=True, max_age=300)
+def admin_user_photo(request, pk):
+    _staff_only(request)
+    p = get_object_or_404(ProfilePhoto, user_id=pk)
+    return HttpResponse(bytes(p.image), content_type=p.content_type)

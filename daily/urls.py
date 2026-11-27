@@ -24,6 +24,8 @@ from .views import (
     LoanDetailApi,
     admin_dashboard,
     admin_toggle_user,
+    profile_photo,
+    admin_user_photo,
 )
 
 urlpatterns = [
@@ -44,9 +46,12 @@ urlpatterns = [
     path("api/loans/", LoanListApi.as_view(), name="loan-list"),
     path("api/loans/<int:pk>/", LoanDetailApi.as_view(), name="loan-detail"),
 
+    path("api/photo/", profile_photo, name="profile-photo"),
+
     # admin dashboard (staff only)
     path("dashboard/", admin_dashboard, name="admin-dashboard"),
     path("dashboard/users/<int:pk>/toggle/", admin_toggle_user, name="admin-toggle-user"),
+    path("dashboard/users/<int:pk>/photo/", admin_user_photo, name="admin-user-photo"),
 
     # Old habit tracker (kept)
     path("daily/", daily_page, name="daily-page"),
